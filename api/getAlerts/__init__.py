@@ -1,3 +1,7 @@
+from boot import init_paths
+init_paths()
+
+from typing import Dict
 import azure.functions as func
 import datetime
 import json
@@ -10,31 +14,7 @@ DISRUPTIVE = {
     "NO_SERVICE","REDUCED_SERVICE","SIGNIFICANT_DELAYS","DETOUR","MODIFIED_SERVICE","OTHER_EFFECT"
 }
 
-app = func.FunctionApp()
-
-@app.route(route="HttpExample", auth_level=func.AuthLevel.ANONYMOUS)
-def HttpExample(req: func.HttpRequest) -> func.HttpResponse:
-    logging.info('Python HTTP trigger function processed a request.')
-
-    name = req.params.get('name')
-    if not name:
-        try:
-            req_body = req.get_json()
-        except ValueError:
-            pass
-        else:
-            name = req_body.get('name')
-
-    headers = {"Access-Control-Allow-Origin": "http://localhost:5173"}
-
-    if name:
-        message = f"Hello, {name}. This HTTP triggered function executed successfully."
-    else:
-        message = "This HTTP triggered function executed successfully. Pass a name in the query string or in the request body for a personalized response."
-    
-    return func.HttpResponse(message, headers=headers)
-
-def filter_alerts(alerts_data: dict, route_id: str) -> list:
+def _filter_alerts(alerts_data: dict, route_id: str) -> list:
     filtered_results = []
     for entity in alerts_data.get("entity", []):
         alert = entity.get("alert", {})
@@ -54,13 +34,19 @@ def filter_alerts(alerts_data: dict, route_id: str) -> list:
             filtered_results.append(alert)
     return filtered_results
 
-@app.route(route="GetAlerts", auth_level=func.AuthLevel.ANONYMOUS)
-def GetAlerts(req: func.HttpRequest) -> func.HttpResponse:
+def _init_headers(req: func.HttpRequest) -> Dict[str, str]:
+    headers = {}
+    origin = req.headers.get('Origin')
+    if origin and '//localhost:' in origin:
+        headers["Access-Control-Allow-Origin"] = "http://localhost:5173"
+    return headers
+
+def main(req: func.HttpRequest) -> func.HttpResponse:
     logging.info('Python HTTP trigger function processed a request.')
 
     alerts_url = "https://s3.amazonaws.com/st-service-alerts-prod/alerts_pb.json"
 
-    headers = {"Access-Control-Allow-Origin": "http://localhost:5173"}
+    headers = _init_headers(req)
     
     try:
         response = requests.get(alerts_url)
@@ -73,6 +59,6 @@ def GetAlerts(req: func.HttpRequest) -> func.HttpResponse:
         logging.error(f"Error decoding JSON: {e}")
         return func.HttpResponse("Error decoding alerts JSON.", status_code=500, headers=headers)
 
-    filtered_alerts = filter_alerts(alerts_data, ROUTE_ID)
+    filtered_alerts = _filter_alerts(alerts_data, ROUTE_ID)
     headers["Content-Type"] = "application/json"
     return func.HttpResponse(json.dumps(filtered_alerts), headers=headers)

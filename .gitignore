@@ -5,6 +5,8 @@ dist
 # Python
 .venv
 __pycache__
+.python_packages
 
 # Other
 local.settings.json
+.env

@@ -2,6 +2,11 @@ import { useState, useEffect } from 'react';
 import './App.css';
 import AlertComponent, { type Alert } from './Alert';
 
+const isLocalHost: boolean = window.location.href.includes('localhost');
+const localHostApiRootURL = 'http://localhost:7071';
+const apiRootURL = `${isLocalHost ? localHostApiRootURL : ''}/api`;
+const getAlertsURL = `${apiRootURL}/getAlerts`;
+
 function App() {
   const [alerts, setAlerts] = useState<Alert[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
@@ -10,7 +15,7 @@ function App() {
   useEffect(() => {
     const fetchAlerts = async () => {
       try {
-        const response = await fetch(`http://localhost:7071/api/GetAlerts`);
+        const response = await fetch(getAlertsURL);
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);
         }
