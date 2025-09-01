@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import './App.css';
 import AlertComponent, { type Alert } from './Alert';
+import { lessThan } from './enums';
 
 const isLocalHost: boolean = window.location.href.includes('localhost');
 const localHostApiRootURL = 'http://localhost:7071';
@@ -20,7 +21,9 @@ function App() {
           throw new Error(`HTTP error! status: ${response.status}`);
         }
         const data = await response.json();
-        setAlerts(data);
+
+        const sortedAlerts = data.sort((a: Alert, b: Alert) => lessThan(a.severity_level, b.severity_level));
+        setAlerts(sortedAlerts);
       } catch (err) {
         setError("Failed to fetch alerts.");
         console.error("Error fetching alerts:", err);

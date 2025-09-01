@@ -23,7 +23,14 @@
 }
 
 .alert-icon {
-  font-size: 1.5em;
+  font-size: 1.5rem; /* Changed from em to rem for consistent sizing */
+  width: 1.5rem; /* Explicit width */
+  height: 1.5rem; /* Explicit height */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0; /* Prevent shrinking */
+  vertical-align: middle; /* Align icon vertically */
 }
 
 .warning-icon {

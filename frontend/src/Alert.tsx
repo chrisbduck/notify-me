@@ -1,6 +1,7 @@
 import React from 'react';
 import './Alert.css';
 import { FaExclamationTriangle, FaInfoCircle, FaTimesCircle } from 'react-icons/fa';
+import { Severity } from './enums';
 
 interface Translation {
   text: string;
@@ -30,7 +31,7 @@ export interface Alert {
   cause_detail: LocalizedText;
   header_text: LocalizedText;
   description_text: LocalizedText;
-  severity_level: string;
+  severity_level: Severity;
   url: LocalizedText;
   active_period: ActivePeriod[];
   informed_entity: InformedEntity[];
@@ -41,13 +42,13 @@ interface AlertProps {
 }
 
 const AlertComponent: React.FC<AlertProps> = ({ alert }) => {
-  const renderSeverityIcon = (severity: string) => {
+  const renderSeverityIcon = (severity: Severity) => {
     switch (severity) {
-      case 'WARNING':
+      case Severity.WARNING:
         return <FaExclamationTriangle className="alert-icon warning-icon" />;
-      case 'INFO':
+      case Severity.INFO:
         return <FaInfoCircle className="alert-icon info-icon" />;
-      case 'SEVERE':
+      case Severity.SEVERE:
         return <FaTimesCircle className="alert-icon severe-icon" />;
       default:
         return null;
