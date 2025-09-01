@@ -1,0 +1,10 @@
+# TypeScript
+node_modules
+dist
+
+# Python
+.venv
+__pycache__
+
+# Other
+local.settings.json

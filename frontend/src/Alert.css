@@ -1,0 +1,63 @@
+.alert-item {
+  display: flex;
+  flex-direction: column; /* Change to column for stacking rows */
+  border: 1px solid #555; /* Darker border for dark mode */
+  padding: 10px;
+  margin-bottom: 10px;
+  border-radius: 5px;
+  background-color: #333; /* Dark grey background */
+  color: #fff; /* White text */
+  position: relative; /* For absolute positioning of icon if needed */
+}
+
+.alert-header-row {
+  display: flex;
+  align-items: center;
+  margin-bottom: 5px;
+}
+
+.alert-header-row h2 {
+  margin: 0;
+  font-size: 1.2em; /* Main heading size */
+  margin-left: 10px; /* Space between icon and heading */
+}
+
+.alert-icon {
+  font-size: 1.5em;
+}
+
+.warning-icon {
+  color: #ffc107; /* Yellow for warning */
+}
+
+.info-icon {
+  color: #17a2b8; /* Blue for info */
+}
+
+.severe-icon {
+  color: #dc3545; /* Red for severe */
+}
+
+.alert-description-row p {
+  margin: 5px 0;
+  font-size: 0.9em; /* Smaller font for description */
+  text-align: left; /* Left justify description text */
+  white-space: pre-wrap; /* Handle newline characters */
+}
+
+.alert-footer-row {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between; /* Distribute items */
+  align-items: center;
+  margin-top: 10px;
+  font-size: 0.8em; /* Smaller font for footer info */
+}
+
+.alert-footer-row p {
+  margin: 0;
+}
+
+.alert-footer-row a {
+  margin-left: auto;
+}
