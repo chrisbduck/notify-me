@@ -48,6 +48,7 @@
 			"command": "swa",
 			"args": [ "deploy" ],
 			"problemMatcher": [ ],
+			"dependsOn": [ "npm: build - frontend" ],
 		}
 	]
 }
