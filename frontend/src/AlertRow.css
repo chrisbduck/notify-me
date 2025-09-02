@@ -14,6 +14,8 @@
   display: flex;
   align-items: center;
   margin-bottom: 5px;
+  cursor: pointer; /* Indicate that the header is clickable */
+  justify-content: space-between; /* Distribute items and push button to the end */
 }
 
 .alert-header-row h2 {
@@ -45,6 +47,10 @@
   color: #dc3545; /* Red for severe */
 }
 
+.alert-description-row {
+  margin-bottom: 5px;
+}
+
 .alert-description-row p {
   margin: 5px 0;
   font-size: 0.9em; /* Smaller font for description */
@@ -67,4 +73,19 @@
 
 .alert-footer-row a {
   margin-left: auto;
+}
+
+.collapse-button {
+  background: none;
+  border: none;
+  color: #fff; /* White color for the icon */
+  font-size: 1.2em;
+  cursor: pointer;
+  margin-left: 10px;
+  padding: 0;
+}
+
+.alert-item.collapsed .alert-description-row,
+.alert-item.collapsed .alert-footer-row {
+  display: none;
 }
