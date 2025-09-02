@@ -1,47 +1,9 @@
 import React from 'react';
-import './Alert.css';
+import './AlertRow.css';
 import { FaExclamationTriangle, FaInfoCircle, FaTimesCircle } from 'react-icons/fa';
-import { Severity } from './enums';
+import { Severity, type AlertModel } from './model';
 
-interface Translation {
-  text: string;
-  language: string;
-}
-
-interface LocalizedText {
-  translation: Translation[];
-}
-
-interface ActivePeriod {
-  start: number;
-  end?: number;
-}
-
-interface InformedEntity {
-  agency_id: string;
-  route_type: number;
-  route_id?: string;
-  stop_id?: string;
-}
-
-export interface Alert {
-  effect: string;
-  effect_detail: LocalizedText;
-  cause: string;
-  cause_detail: LocalizedText;
-  header_text: LocalizedText;
-  description_text: LocalizedText;
-  severity_level: Severity;
-  url: LocalizedText;
-  active_period: ActivePeriod[];
-  informed_entity: InformedEntity[];
-}
-
-interface AlertProps {
-  alert: Alert;
-}
-
-const AlertComponent: React.FC<AlertProps> = ({ alert }) => {
+const AlertRow: React.FC<{ alert: AlertModel }> = ({ alert }) => {
   const renderSeverityIcon = (severity: Severity) => {
     switch (severity) {
       case Severity.WARNING:
@@ -80,4 +42,4 @@ const AlertComponent: React.FC<AlertProps> = ({ alert }) => {
   );
 };
 
-export default AlertComponent;
+export default AlertRow;

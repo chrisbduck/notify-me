@@ -1,7 +1,7 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import './App.css';
-import AlertComponent, { type Alert } from './Alert';
-import { lessThan } from './enums';
+import AlertRow from './AlertRow';
+import { alertSeverityLessThan, type AlertModel } from './model';
 
 const isLocalHost: boolean = window.location.href.includes('localhost');
 const localHostApiRootURL = 'http://localhost:7071';
@@ -9,11 +9,16 @@ const apiRootURL = `${isLocalHost ? localHostApiRootURL : ''}/api`;
 const getAlertsURL = `${apiRootURL}/getAlerts`;
 
 function App() {
-  const [alerts, setAlerts] = useState<Alert[]>([]);
+  const [alerts, setAlerts] = useState<AlertModel[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
 
+  const hasFetched = useRef(false);
+
   useEffect(() => {
+    if (hasFetched.current) return;
+    hasFetched.current = true;
+
     const fetchAlerts = async () => {
       try {
         const response = await fetch(getAlertsURL);
@@ -22,7 +27,7 @@ function App() {
         }
         const data = await response.json();
 
-        const sortedAlerts = data.sort((a: Alert, b: Alert) => lessThan(a.severity_level, b.severity_level));
+        const sortedAlerts = data.sort(alertSeverityLessThan);
         setAlerts(sortedAlerts);
       } catch (err) {
         setError("Failed to fetch alerts.");
@@ -49,7 +54,7 @@ function App() {
         {!loading && !error && alerts.length > 0 && (
           <div className="alerts-list">
             {alerts.map((alert, index) => (
-              <AlertComponent key={alert.header_text.translation[0]?.text || index} alert={alert} />
+              <AlertRow key={alert.header_text.translation[0]?.text || index} alert={alert} />
             ))}
           </div>
         )}
