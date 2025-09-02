@@ -1,14 +1,20 @@
 .alert-item {
   display: flex;
   flex-direction: column; /* Change to column for stacking rows */
-  border: 1px solid #555; /* Darker border for dark mode */
-  padding: 10px;
+  border: 1px solid #444; /* Softer border for dark mode */
+  padding: 12px; /* Slightly increased padding */
   margin-bottom: 10px;
-  border-radius: 5px;
-  background-color: #333; /* Dark grey background */
-  color: #fff; /* White text */
+  border-radius: 8px; /* Slightly more rounded corners */
+  background-color: #2a2a2a; /* Darker grey background */
+  color: #e0e0e0; /* Softer white text */
   position: relative; /* For absolute positioning of icon if needed */
   text-align: left;
+  transition: background-color 0.2s ease-in-out, border-color 0.2s ease-in-out; /* Smooth transition for hover */
+}
+
+.alert-item:hover {
+  background-color: #3a3a3a; /* Slightly lighter on hover */
+  border-color: #666; /* Lighter border on hover */
 }
 
 .alert-header-row {
@@ -50,11 +56,16 @@
 
 .alert-description-row {
   margin-bottom: 5px;
+  max-height: 1000px; /* Increased max height for expanded state to accommodate mobile content */
+  overflow: hidden;
+  transition: max-height 0.3s ease-out, opacity 0.3s ease-out; /* Smooth slide transition */
+  opacity: 1;
 }
 
 .alert-description-row p {
-  margin: 5px 0;
-  font-size: 0.9em; /* Smaller font for description */
+  margin: 8px 0; /* Increased vertical margin */
+  font-size: 0.95em; /* Slightly larger font for description */
+  line-height: 1.5; /* Improved line height for readability */
   white-space: pre-wrap; /* Handle newline characters */
 }
 
@@ -78,6 +89,10 @@
   align-items: center;
   margin-top: 10px;
   font-size: 0.8em; /* Smaller font for footer info */
+  max-height: 1000px; /* Increased max height for expanded state to accommodate mobile content */
+  overflow: hidden;
+  transition: max-height 0.3s ease-out, opacity 0.3s ease-out; /* Smooth slide transition */
+  opacity: 1;
 }
 
 .alert-footer-row p {
@@ -86,6 +101,14 @@
 
 .alert-footer-row a {
   margin-left: auto;
+  color: #8ab4f8; /* A subtle blue accent for links */
+  text-decoration: none; /* Remove underline */
+  transition: color 0.2s ease-in-out;
+}
+
+.alert-footer-row a:hover {
+  color: #a7c7ff; /* Lighter blue on hover */
+  text-decoration: underline; /* Underline on hover */
 }
 
 .collapse-button {
@@ -103,5 +126,8 @@
 
 .alert-item.collapsed .alert-description-row,
 .alert-item.collapsed .alert-footer-row {
-  display: none;
+  max-height: 0; /* Collapse height */
+  opacity: 0; /* Fade out */
+  margin-bottom: 0; /* Remove margin when collapsed */
+  margin-top: 0; /* Remove margin when collapsed */
 }

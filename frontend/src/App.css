@@ -47,8 +47,6 @@ body {
 }
 
 .App-header {
-  background-color: #282c34; /* Dark background for header */
-  color: #f0f0f0; /* Light text color for header */
-  padding: 20px;
-  border-bottom: 1px solid #555;
+  color: #e0e0e0; /* Slightly softer light text color for header */
+  padding: 25px 20px; /* Increased vertical padding */
 }
