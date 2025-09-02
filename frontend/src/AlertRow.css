@@ -8,6 +8,7 @@
   background-color: #333; /* Dark grey background */
   color: #fff; /* White text */
   position: relative; /* For absolute positioning of icon if needed */
+  text-align: left;
 }
 
 .alert-header-row {
@@ -15,13 +16,13 @@
   align-items: center;
   margin-bottom: 5px;
   cursor: pointer; /* Indicate that the header is clickable */
-  justify-content: space-between; /* Distribute items and push button to the end */
+  justify-content: flex-start; /* Align items to the start */
+  gap: 20px; /* Add space between items */
 }
 
 .alert-header-row h2 {
   margin: 0;
   font-size: 1.2em; /* Main heading size */
-  margin-left: 10px; /* Space between icon and heading */
 }
 
 .alert-icon {
@@ -54,7 +55,6 @@
 .alert-description-row p {
   margin: 5px 0;
   font-size: 0.9em; /* Smaller font for description */
-  text-align: left; /* Left justify description text */
   white-space: pre-wrap; /* Handle newline characters */
 }
 
@@ -94,8 +94,11 @@
   color: #fff; /* White color for the icon */
   font-size: 1.2em;
   cursor: pointer;
-  margin-left: 10px;
+  margin-left: auto; /* Push the button to the far right */
   padding: 0;
+  display: flex; /* Use flexbox for centering content */
+  align-items: center; /* Vertically center the icon */
+  justify-content: center; /* Horizontally center the icon */
 }
 
 .alert-item.collapsed .alert-description-row,

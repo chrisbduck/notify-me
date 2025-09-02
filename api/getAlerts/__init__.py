@@ -61,4 +61,5 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
 
     filtered_alerts = _filter_alerts(alerts_data, ROUTE_ID)
     headers["Content-Type"] = "application/json"
+    headers["Cache-Control"] = "public, max-age=59"
     return func.HttpResponse(json.dumps(filtered_alerts), headers=headers)

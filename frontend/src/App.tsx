@@ -28,45 +28,88 @@ function App() {
   const [alerts, setAlerts] = useState<AlertModel[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
+  const [lastFetched, setLastFetched] = useState<string | null>(null);
 
-  const hasFetched = useRef(false);
+  const lastFetchTimestamp = useRef<number>(0); // Store timestamp of last fetch
+  const intervalIdRef = useRef<number | null>(null); // Store interval ID
+  const refreshQueued = useRef<boolean>(false); // Track if a refresh is queued
+
+  const fetchAlerts = async () => {
+    // Prevent re-fetch within 60 seconds
+    const now = Date.now();
+    if (now - lastFetchTimestamp.current < 60000 && lastFetchTimestamp.current !== 0) return;
+
+    setLoading(true);
+    setError(null);
+    try {
+      const response = await fetch(getAlertsURL);
+      if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+
+      const alerts: AlertModel[] = await response.json();
+      const processedAlerts = processAlerts(alerts);
+      setAlerts(processedAlerts);
+      setLastFetched(new Date().toLocaleTimeString());
+      lastFetchTimestamp.current = now;
+    } catch (err) {
+      setError("Failed to fetch alerts.");
+      console.error("Error fetching alerts:", err);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    if (hasFetched.current) return;
-    hasFetched.current = true;
+    fetchAlerts(); // Initial fetch
 
-    const fetchAlerts = async () => {
-      try {
-        const response = await fetch(getAlertsURL);
-        if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`);
-        }
-        const alerts: AlertModel[] = await response.json();
-        const processedAlerts = processAlerts(alerts);
-        setAlerts(processedAlerts);
-      } catch (err) {
-        setError("Failed to fetch alerts.");
-        console.error("Error fetching alerts:", err);
-      } finally {
-        setLoading(false);
+    const startInterval = () => {
+      if (intervalIdRef.current !== null) {
+        clearInterval(intervalIdRef.current);
+      }
+      intervalIdRef.current = setInterval(fetchAlerts, 60000) as unknown as number;
+    };
+
+    const stopInterval = () => {
+      if (intervalIdRef.current !== null) {
+        clearInterval(intervalIdRef.current);
+        intervalIdRef.current = null;
       }
     };
 
-    fetchAlerts();
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible') {
+        startInterval();
+        if (refreshQueued.current) {
+          fetchAlerts();
+          refreshQueued.current = false;
+        }
+      } else {
+        stopInterval();
+        refreshQueued.current = true; // Queue a refresh for when the tab becomes visible
+      }
+    };
+
+    startInterval(); // Start interval on mount
+
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+
+    return () => {
+      stopInterval();
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+    };
   }, []);
 
   return (
     <div className="App">
       <header className="App-header">
         <h1>Sound Transit Alerts</h1>
+        {loading ? <p>Loading alerts...</p> : lastFetched && <p>Last updated: {lastFetched}</p>}
       </header>
       <main>
-        {loading && <p>Loading alerts...</p>}
         {error && <p style={{ color: 'red' }}>{error}</p>}
         {!loading && !error && alerts.length === 0 && (
           <p>No active alerts.</p>
         )}
-        {!loading && !error && alerts.length > 0 && (
+        {alerts.length > 0 && (
           <div className="alerts-list">
             {alerts.map((alert, index) => (
               <AlertRow key={alert.header_text.translation[0]?.text || index} alert={alert} />
