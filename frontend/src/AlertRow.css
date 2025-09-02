@@ -58,6 +58,19 @@
   white-space: pre-wrap; /* Handle newline characters */
 }
 
+/* Severity-based brightness */
+.alert-item.severity-info {
+  filter: brightness(0.7); /* Dimmest for INFO */
+}
+
+.alert-item.severity-warning {
+  filter: brightness(0.9); /* Slightly brighter for WARNING */
+}
+
+.alert-item.severity-severe {
+  filter: brightness(1.1); /* Brightest for SEVERE */
+}
+
 .alert-footer-row {
   display: flex;
   flex-direction: row;

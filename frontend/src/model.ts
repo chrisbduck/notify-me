@@ -1,10 +1,10 @@
 // Types
 
 export const Severity = {
-    UNKNOWN_SEVERITY: "UNKNOWN_SEVERITY",
-    INFO: "INFO",
-    WARNING: "WARNING",
-    SEVERE: "SEVERE",
+  UNKNOWN_SEVERITY: "UNKNOWN_SEVERITY",
+  INFO: "INFO",
+  WARNING: "WARNING",
+  SEVERE: "SEVERE",
 } as const;
 
 export type Severity = (typeof Severity)[keyof typeof Severity];
@@ -46,18 +46,20 @@ export interface AlertModel {
 // Data
 
 const severityOrder: Record<Severity, number> = {
-    [Severity.SEVERE]: 1,
-    [Severity.WARNING]: 2,
-    [Severity.INFO]: 3,
-    [Severity.UNKNOWN_SEVERITY]: 4,
+  [Severity.SEVERE]: 1,
+  [Severity.WARNING]: 2,
+  [Severity.INFO]: 3,
+  [Severity.UNKNOWN_SEVERITY]: 4,
 };
 
 // Functions
 
 export function lessThan(a?: Severity, b?: Severity): number {
-    const severityA = a || Severity.UNKNOWN_SEVERITY;
-    const severityB = b || Severity.UNKNOWN_SEVERITY;
-    return severityOrder[severityA] - severityOrder[severityB];
+  const severityA = a || Severity.UNKNOWN_SEVERITY;
+  const severityB = b || Severity.UNKNOWN_SEVERITY;
+  return severityOrder[severityA] - severityOrder[severityB];
 }
 
-export const alertSeverityLessThan = (a: AlertModel, b: AlertModel) => lessThan(a.severity_level, b.severity_level);
+export function sortBySeverity(alerts: AlertModel[]): AlertModel[] {
+  return alerts.slice().sort((a: AlertModel, b: AlertModel) => lessThan(a.severity_level, b.severity_level));
+}

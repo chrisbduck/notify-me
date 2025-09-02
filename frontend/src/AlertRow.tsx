@@ -3,6 +3,31 @@ import './AlertRow.css';
 import { FaExclamationTriangle, FaInfoCircle, FaTimesCircle, FaChevronDown, FaChevronUp } from 'react-icons/fa';
 import { Severity, type AlertModel } from './model';
 
+const renderSeverityIcon = (severity: Severity) => {
+  switch (severity) {
+    case Severity.WARNING:
+      return <FaExclamationTriangle className="alert-icon warning-icon" />;
+    case Severity.INFO:
+      return <FaInfoCircle className="alert-icon info-icon" />;
+    case Severity.SEVERE:
+      return <FaTimesCircle className="alert-icon severe-icon" />;
+    default:
+      return null;
+  }
+};
+
+const getSeverityClass = (severity: Severity) => {
+  switch (severity) {
+    case Severity.WARNING:
+      return 'severity-warning';
+    case Severity.SEVERE:
+      return 'severity-severe';
+    case Severity.INFO:
+    default:
+      return 'severity-info';
+  }
+};
+
 const AlertRow: React.FC<{ alert: AlertModel }> = ({ alert }) => {
   const [isCollapsed, setIsCollapsed] = useState(true);
 
@@ -10,21 +35,8 @@ const AlertRow: React.FC<{ alert: AlertModel }> = ({ alert }) => {
     setIsCollapsed(!isCollapsed);
   };
 
-  const renderSeverityIcon = (severity: Severity) => {
-    switch (severity) {
-      case Severity.WARNING:
-        return <FaExclamationTriangle className="alert-icon warning-icon" />;
-      case Severity.INFO:
-        return <FaInfoCircle className="alert-icon info-icon" />;
-      case Severity.SEVERE:
-        return <FaTimesCircle className="alert-icon severe-icon" />;
-      default:
-        return null;
-    }
-  };
-
   return (
-    <div className={`alert-item ${isCollapsed ? 'collapsed' : ''}`}>
+    <div className={`alert-item ${isCollapsed ? 'collapsed' : ''} ${getSeverityClass(alert.severity_level)}`}>
       <div className="alert-header-row" onClick={toggleCollapse}>
         {renderSeverityIcon(alert.severity_level)}
         <h2>{alert.header_text.translation[0]?.text}</h2>

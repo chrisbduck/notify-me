@@ -1,12 +1,28 @@
 import { useState, useEffect, useRef } from 'react';
 import './App.css';
 import AlertRow from './AlertRow';
-import { alertSeverityLessThan, type AlertModel } from './model';
+import { type AlertModel, Severity, sortBySeverity } from './model';
 
 const isLocalHost: boolean = window.location.href.includes('localhost');
 const localHostApiRootURL = 'http://localhost:7071';
 const apiRootURL = `${isLocalHost ? localHostApiRootURL : ''}/api`;
 const getAlertsURL = `${apiRootURL}/getAlerts`;
+
+// Control constant for enabling severity override for testing
+const ENABLE_SEVERITY_OVERRIDE_FOR_TESTING = isLocalHost && false;
+
+const overrideAlertSeveritiesForTesting = (alertsToModify: AlertModel[]): AlertModel[] => {
+  const severityLevels = [Severity.INFO, Severity.WARNING, Severity.SEVERE, Severity.UNKNOWN_SEVERITY];
+  return alertsToModify.map((alert, index) => ({
+    ...alert,
+    severity_level: severityLevels[index % severityLevels.length],
+  }));
+};
+
+function processAlerts(alerts: AlertModel[]): AlertModel[] {
+  const processedAlerts = ENABLE_SEVERITY_OVERRIDE_FOR_TESTING ? overrideAlertSeveritiesForTesting(alerts) : alerts;
+  return sortBySeverity(processedAlerts);
+}
 
 function App() {
   const [alerts, setAlerts] = useState<AlertModel[]>([]);
@@ -25,10 +41,9 @@ function App() {
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);
         }
-        const data = await response.json();
-
-        const sortedAlerts = data.sort(alertSeverityLessThan);
-        setAlerts(sortedAlerts);
+        const alerts: AlertModel[] = await response.json();
+        const processedAlerts = processAlerts(alerts);
+        setAlerts(processedAlerts);
       } catch (err) {
         setError("Failed to fetch alerts.");
         console.error("Error fetching alerts:", err);
