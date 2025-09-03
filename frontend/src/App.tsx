@@ -1,28 +1,8 @@
 import { useState, useEffect, useRef } from 'react';
 import './App.css';
 import AlertRow from './AlertRow';
-import { type AlertModel, Severity, sortBySeverity } from './model';
-
-const isLocalHost: boolean = window.location.href.includes('localhost');
-const localHostApiRootURL = 'http://localhost:7071';
-const apiRootURL = `${isLocalHost ? localHostApiRootURL : ''}/api`;
-const getAlertsURL = `${apiRootURL}/getAlerts`;
-
-// Control constant for enabling severity override for testing
-const ENABLE_SEVERITY_OVERRIDE_FOR_TESTING = isLocalHost && false;
-
-const overrideAlertSeveritiesForTesting = (alertsToModify: AlertModel[]): AlertModel[] => {
-  const severityLevels = [Severity.INFO, Severity.WARNING, Severity.SEVERE, Severity.UNKNOWN_SEVERITY];
-  return alertsToModify.map((alert, index) => ({
-    ...alert,
-    severity_level: severityLevels[index % severityLevels.length],
-  }));
-};
-
-function processAlerts(alerts: AlertModel[]): AlertModel[] {
-  const processedAlerts = ENABLE_SEVERITY_OVERRIDE_FOR_TESTING ? overrideAlertSeveritiesForTesting(alerts) : alerts;
-  return sortBySeverity(processedAlerts);
-}
+import { fetchAndProcessAlerts } from './alertService';
+import { type AlertModel } from './model';
 
 function App() {
   const [alerts, setAlerts] = useState<AlertModel[]>([]);
@@ -34,7 +14,7 @@ function App() {
   const intervalIdRef = useRef<number | null>(null); // Store interval ID
   const refreshQueued = useRef<boolean>(false); // Track if a refresh is queued
 
-  const fetchAlerts = async () => {
+  const getAlerts = async () => {
     // Prevent re-fetch within 60 seconds
     const now = Date.now();
     if (now - lastFetchTimestamp.current < 60000 && lastFetchTimestamp.current !== 0) return;
@@ -42,12 +22,8 @@ function App() {
     setLoading(true);
     setError(null);
     try {
-      const response = await fetch(getAlertsURL);
-      if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-
-      const alerts: AlertModel[] = await response.json();
-      const processedAlerts = processAlerts(alerts);
-      setAlerts(processedAlerts);
+      const alerts: AlertModel[] = await fetchAndProcessAlerts();
+      setAlerts(alerts);
       setLastFetched(new Date().toLocaleTimeString());
       lastFetchTimestamp.current = now;
     } catch (err) {
@@ -59,13 +35,13 @@ function App() {
   };
 
   useEffect(() => {
-    fetchAlerts(); // Initial fetch
+    getAlerts(); // Initial fetch
 
     const startInterval = () => {
       if (intervalIdRef.current !== null) {
         clearInterval(intervalIdRef.current);
       }
-      intervalIdRef.current = setInterval(fetchAlerts, 60000) as unknown as number;
+      intervalIdRef.current = setInterval(getAlerts, 60000) as unknown as number;
     };
 
     const stopInterval = () => {
@@ -79,7 +55,7 @@ function App() {
       if (document.visibilityState === 'visible') {
         startInterval();
         if (refreshQueued.current) {
-          fetchAlerts();
+          getAlerts();
           refreshQueued.current = false;
         }
       } else {
