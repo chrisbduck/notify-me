@@ -40,3 +40,30 @@
   color: #f0f0f0; /* Light text color for content */
   font-size: 0.9em;
 }
+
+.weather-details-container {
+  display: flex;
+  justify-content: space-around;
+  align-items: flex-start;
+  margin-bottom: 10px;
+}
+
+.weather-details-column {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.weather-details-column h4 {
+  margin-top: 0;
+  margin-bottom: 5px;
+  color: #e0e0e0;
+  font-size: 1em;
+}
+
+.weather-details {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}

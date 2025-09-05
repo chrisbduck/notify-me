@@ -1,9 +1,37 @@
 import React, { useEffect, useState } from 'react';
-import { getKirklandWeather, getSeattleWeather, type WeatherData } from './weatherService';
-import './WeatherDisplay.css'; // We'll create this CSS file next
+import { getSeattleWeather, type WeatherData } from './weatherService';
+import './WeatherDisplay.css';
 
-const WeatherCard: React.FC<{ city: string; weather: WeatherData | null }> = ({ city, weather }) => {
-    if (!weather) {
+const isBefore2PM = (date: Date): boolean => {
+    const twoPM = new Date(date);
+    twoPM.setHours(14, 0, 0, 0); // 2 PM local time
+    return date.getTime() < twoPM.getTime();
+};
+
+interface WeatherDetailsProps {
+    icon: string;
+    temperature: number;
+    temperatureUnit: string;
+    shortForecast: string;
+}
+
+const WeatherDetails: React.FC<WeatherDetailsProps> = ({ icon, temperature, temperatureUnit, shortForecast }) => (
+    <div className="weather-details">
+        <img src={icon} alt={shortForecast} className="weather-icon" />
+        <p>{temperature}°{temperatureUnit}</p>
+        <p>{shortForecast}</p>
+    </div>
+);
+
+interface WeatherCardProps {
+    city: string;
+    currentWeather: WeatherData | null;
+    forecast4pm: WeatherData | null;
+    show4pmForecast: boolean;
+}
+
+const WeatherCard: React.FC<WeatherCardProps> = ({ city, currentWeather, forecast4pm, show4pmForecast }) => {
+    if (!currentWeather) {
         return (
             <div className="weather-card">
                 <h3>{city}</h3>
@@ -15,24 +43,59 @@ const WeatherCard: React.FC<{ city: string; weather: WeatherData | null }> = ({ 
     return (
         <div className="weather-card">
             <h3>{city}</h3>
-            <img src={weather.icon} alt={weather.shortForecast} className="weather-icon" />
-            <p>Current: {weather.temperature}°{weather.temperatureUnit}</p>
-            {weather.minTemperature !== undefined && weather.maxTemperature !== undefined && (
-                <p>Min/Max: {weather.minTemperature}°{weather.temperatureUnit} / {weather.maxTemperature}°{weather.temperatureUnit}</p>
+            <div className="weather-details-container">
+                <div className="weather-details-column">
+                    <h4>Now</h4>
+                    <WeatherDetails
+                        icon={currentWeather.icon}
+                        temperature={currentWeather.temperature}
+                        temperatureUnit={currentWeather.temperatureUnit}
+                        shortForecast={currentWeather.shortForecast}
+                    />
+                </div>
+                {show4pmForecast && forecast4pm && (
+                    <div className="weather-details-column">
+                        <h4>4 PM</h4>
+                        <WeatherDetails
+                            icon={forecast4pm.icon}
+                            temperature={forecast4pm.temperature}
+                            temperatureUnit={forecast4pm.temperatureUnit}
+                            shortForecast={forecast4pm.shortForecast}
+                        />
+                    </div>
+                )}
+            </div>
+            {currentWeather.minTemperature !== undefined && currentWeather.maxTemperature !== undefined && (
+                <p>Min/Max: {currentWeather.minTemperature}°{currentWeather.temperatureUnit} / {currentWeather.maxTemperature}°{currentWeather.temperatureUnit}</p>
             )}
-            <p>{weather.shortForecast}</p>
         </div>
     );
 };
 
 const WeatherDisplay: React.FC = () => {
-    const [kirklandWeather, setKirklandWeather] = useState<WeatherData | null>(null);
     const [seattleWeather, setSeattleWeather] = useState<WeatherData | null>(null);
 
     useEffect(() => {
         const fetchWeather = async () => {
-            setKirklandWeather(await getKirklandWeather());
             setSeattleWeather(await getSeattleWeather());
+        };
+
+        fetchWeather();
+        const interval = setInterval(fetchWeather, 300000); // Refresh every 5 minutes
+
+        return () => clearInterval(interval);
+    }, []);
+
+    const [seattleWeather4pm, setSeattleWeather4pm] = useState<WeatherData | null>(null);
+    const currentTime = new Date();
+
+    useEffect(() => {
+        const fetchWeather = async () => {
+            setSeattleWeather(await getSeattleWeather());
+
+            const fourPM = new Date();
+            fourPM.setHours(16, 0, 0, 0); // 4 PM local time
+            setSeattleWeather4pm(await getSeattleWeather(fourPM));
         };
 
         fetchWeather();
@@ -43,8 +106,12 @@ const WeatherDisplay: React.FC = () => {
 
     return (
         <div className="weather-display-container">
-            <WeatherCard city="Kirkland, WA" weather={kirklandWeather} />
-            <WeatherCard city="Seattle, WA" weather={seattleWeather} />
+            <WeatherCard
+                city="Seattle, WA"
+                currentWeather={seattleWeather}
+                forecast4pm={seattleWeather4pm}
+                show4pmForecast={isBefore2PM(currentTime)}
+            />
         </div>
     );
 };
