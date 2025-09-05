@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import './App.css';
 import AlertRow from './AlertRow';
 import WeatherDisplay from './WeatherDisplay';
+import AlertSummaryCard from './AlertSummaryCard';
 import { fetchAndProcessAlerts } from './alertService';
 import { type AlertModel } from './model';
 
@@ -81,7 +82,10 @@ function App() {
         <h1>Sound Transit Alerts</h1>
         {loading ? <p>Loading alerts...</p> : lastFetched && <p>Last updated: {lastFetched}</p>}
       </header>
-      <WeatherDisplay />
+      <div className="main-content-cards">
+        <WeatherDisplay />
+        <AlertSummaryCard />
+      </div>
       <main>
         {error && <p style={{ color: 'red' }}>{error}</p>}
         {!loading && !error && alerts.length === 0 && (

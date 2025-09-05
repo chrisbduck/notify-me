@@ -2,8 +2,6 @@
   display: flex;
   justify-content: center;
   gap: 20px;
-  margin-top: 20px;
-  margin-bottom: 20px;
   flex-wrap: wrap;
 }
 
@@ -15,6 +13,10 @@
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2); /* Slightly darker shadow for dark mode */
   text-align: center;
   width: 200px;
+  height: 250px; /* Set a fixed height for consistent card sizing */
+  display: flex; /* Use flexbox for internal layout */
+  flex-direction: column; /* Stack content vertically */
+  justify-content: space-evenly; /* Distribute space evenly between items */
   color: #e0e0e0; /* Softer white text, similar to alert-item */
   transition: background-color 0.2s ease-in-out, border-color 0.2s ease-in-out;
 }
@@ -43,9 +45,10 @@
 
 .weather-details-container {
   display: flex;
-  justify-content: space-around;
+  justify-content: space-evenly; /* Distribute space evenly */
   align-items: flex-start;
   margin-bottom: 10px;
+  flex-grow: 1; /* Allow this container to grow and fill space */
 }
 
 .weather-details-column {
@@ -66,4 +69,25 @@
   display: flex;
   flex-direction: column;
   align-items: center;
+}
+
+.alert-summary-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  flex-grow: 1; /* Allow content to grow and fill available space */
+}
+
+.alert-summary-icon {
+  font-size: 3em;
+  margin-bottom: 10px;
+}
+
+.alert-summary-icon.severe-icon {
+  color: #ff4d4d; /* Red for severe alerts */
+}
+
+.alert-summary-icon.success-icon {
+  color: #5cb85c; /* Green for no major problems */
 }
