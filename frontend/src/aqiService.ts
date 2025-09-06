@@ -1,5 +1,4 @@
 import { apiFetch } from './apiFetch';
-import type { AqiData } from './model';
 
 interface AqiApiResponse {
     sensor: string;
@@ -12,41 +11,25 @@ interface AqiApiResponse {
     fetched_at: number;
 }
 
-const getAqiIcon = (category: string): string => {
-    switch (category.toLowerCase()) {
-        case 'good':
-            return 'https://api.weather.gov/icons/land/day/skc?size=medium'; // Clear sky
-        case 'moderate':
-            return 'https://api.weather.gov/icons/land/day/few?size=medium'; // Few clouds
-        case 'unhealthy for sensitive groups':
-            return 'https://api.weather.gov/icons/land/day/bkn?size=medium'; // Broken clouds
-        case 'unhealthy':
-            return 'https://api.weather.gov/icons/land/day/ovc?size=medium'; // Overcast
-        case 'very unhealthy':
-            return 'https://api.weather.gov/icons/land/day/fzra?size=medium'; // Freezing rain (as a severe warning)
-        case 'hazardous':
-            return 'https://api.weather.gov/icons/land/day/sn?size=medium'; // Snow (as a very severe warning)
-        default:
-            return 'https://api.weather.gov/icons/land/day/wind?size=medium'; // Default/unknown
-    }
-};
+export interface AqiData {
+    aqi: number;
+    category: string;
+}
 
-export const getSeattleAqi = async (): Promise<AqiData | null> => {
+export const getAqiDataForLocation = async (locationKey: string): Promise<AqiData | null> => {
     try {
-        const response = await apiFetch('aqi?sensor=102160');
+        const response = await apiFetch(`aqi?sensor=${locationKey}`);
         if (!response.ok) {
             throw new Error(`HTTP error! status: ${response.status}`);
         }
         const data: AqiApiResponse = await response.json();
 
         return {
-            locationName: "Seattle, WA",
             aqi: data.aqi,
             category: data.category,
-            icon: getAqiIcon(data.category),
         };
     } catch (error) {
-        console.error('Error fetching AQI data:', error);
+        console.error(`Error fetching AQI data for ${locationKey}:`, error);
         return null;
     }
 };

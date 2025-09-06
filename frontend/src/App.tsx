@@ -84,9 +84,9 @@ function App() {
         {loading ? <p>Loading alerts...</p> : lastFetched && <p>Last updated: {lastFetched}</p>}
       </header>
       <div className="main-content-cards">
+        <AlertSummaryCard />
         <WeatherDisplay />
         <AqiDisplay />
-        <AlertSummaryCard />
       </div>
       <main>
         {error && <p style={{ color: 'red' }}>{error}</p>}

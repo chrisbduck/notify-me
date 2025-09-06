@@ -10,7 +10,10 @@ from shared_utils import init_headers
 # --- Optional friendly names (from your original script) ---
 SENSOR_NAMES: Dict[str, int] = {
     "finn-hill": 156415,
+    "mountlake-terrace": 156807,
+    "seattle-downtown": 167259,
     "juanita": 102160,
+    "north-kirkland": 192162,
     "sunnyvale": 68619,
     "san-francisco": 36529,
     "adelaide": 95971,
@@ -81,8 +84,7 @@ def resolve_sensor_id(sensor: str) -> int:
     if s in SENSOR_NAMES:
         return SENSOR_NAMES[s]
     try:
-        n = int(s)
-        return n
+        return int(s)
     except ValueError:
         raise ValueError(f"Unrecognized sensor identifier: {sensor}")
 

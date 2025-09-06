@@ -1,6 +1,5 @@
-import React, { useEffect, useState } from 'react';
-import type { AqiData } from './model';
-import { getSeattleAqi } from './aqiService';
+import React, { useEffect, useState, useRef } from 'react';
+import { getAqiDataForLocation, type AqiData } from './aqiService';
 import './AqiDisplay.css';
 
 interface AqiCardProps {
@@ -9,44 +8,53 @@ interface AqiCardProps {
 }
 
 const AqiCard: React.FC<AqiCardProps> = ({ locationName, aqiData }) => {
-    if (!aqiData) {
-        return (
-            <div className="aqi-card">
-                <h3>{locationName}</h3>
-                <p>Loading AQI data...</p>
-            </div>
-        );
-    }
+    const contents = aqiData ? (
+        <div className="aqi-details-container">
+            <div className={`aqi-circle aqi-circle-${aqiData.category.toLowerCase().replace(/\s/g, '-')}`}></div>
+            <p className="aqi-value">{aqiData.aqi.toFixed(1)}</p>
+            <p className="aqi-category">{aqiData.category}</p>
+        </div>
+    ) : <p>Loading AQI data...</p>;
 
     return (
         <div className="aqi-card">
             <h3>{locationName}</h3>
-            <div className="aqi-details-container">
-                <div className={`aqi-circle aqi-circle-${aqiData.category.toLowerCase().replace(/\s/g, '-')}`}></div>
-                <p className="aqi-value">{aqiData.aqi.toFixed(1)}</p>
-                <p className="aqi-category">{aqiData.category}</p>
-            </div>
+            {contents}
         </div>
     );
 };
 
 const AqiDisplay: React.FC = () => {
-    const [seattleAqi, setSeattleAqi] = useState<AqiData | null>(null);
+    const [northKirklandAqi, setNorthKirklandAqi] = useState<AqiData | null>(null);
+    const [seattleDowntownAqi, setSeattleDowntownAqi] = useState<AqiData | null>(null);
+    const [mountlakeTerraceAqi, setMountlakeTerraceAqi] = useState<AqiData | null>(null);
+    const effectRan = useRef(false);
 
     useEffect(() => {
-        const fetchAqi = async () => {
-            setSeattleAqi(await getSeattleAqi());
+        if (effectRan.current) return;
+        const fetchAqiData = async () => {
+            const [northKirklandAqiData, seattleDowntownAqiData, mountlakeTerraceAqiData] = await Promise.all([
+                getAqiDataForLocation("north-kirkland"),
+                getAqiDataForLocation("seattle-downtown"),
+                getAqiDataForLocation("mountlake-terrace")
+            ]);
+            setNorthKirklandAqi(northKirklandAqiData);
+            setSeattleDowntownAqi(seattleDowntownAqiData);
+            setMountlakeTerraceAqi(mountlakeTerraceAqiData);
         };
 
-        fetchAqi();
-        const interval = setInterval(fetchAqi, 300000); // Refresh every 5 minutes
+        fetchAqiData();
+        const interval = setInterval(fetchAqiData, 300000); // Refresh every 5 minutes
+        effectRan.current = true;
 
         return () => clearInterval(interval);
     }, []);
 
     return (
         <div className="aqi-display-container">
-            <AqiCard locationName="Seattle, WA" aqiData={seattleAqi} />
+            <AqiCard locationName="North Kirkland" aqiData={northKirklandAqi} />
+            <AqiCard locationName="Seattle Downtown" aqiData={seattleDowntownAqi} />
+            <AqiCard locationName="Mountlake Terrace" aqiData={mountlakeTerraceAqi} />
         </div>
     );
 };
