@@ -5,6 +5,7 @@ from typing import Dict, Literal, Optional, Union
 import azure.functions as func
 import requests
 from requests import Response
+from shared_utils import init_headers
 
 # --- Optional friendly names (from your original script) ---
 SENSOR_NAMES: Dict[str, int] = {
@@ -120,7 +121,7 @@ def fetch_sensor_row(api_key: str, sensor_index: int, pm_field: str, max_age_min
 
 def to_json_response(body: dict, status_code: int = 200) -> func.HttpResponse:
     return func.HttpResponse(body=json.dumps(body), status_code=status_code, mimetype="application/json",
-                             headers={"Cache-Control": "no-store"})
+                             headers=init_headers())
 
 def create_json_error(message: str, status_code: int) -> func.HttpResponse:
     return to_json_response({"error": message}, status_code)

@@ -175,3 +175,11 @@ export function lessThan(a?: Severity, b?: Severity): number {
 export function sortBySeverity(alerts: AlertModel[]): AlertModel[] {
   return alerts.slice().sort((a: AlertModel, b: AlertModel) => lessThan(a.severity_level, b.severity_level));
 }
+
+
+export interface AqiData {
+  locationName: string;
+  aqi: number;
+  category: string;
+  icon: string;
+}

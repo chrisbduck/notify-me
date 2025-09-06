@@ -3,6 +3,7 @@ import './App.css';
 import AlertRow from './AlertRow';
 import WeatherDisplay from './WeatherDisplay';
 import AlertSummaryCard from './AlertSummaryCard';
+import AqiDisplay from './AqiDisplay';
 import { fetchAndProcessAlerts } from './alertService';
 import { type AlertModel } from './model';
 
@@ -84,6 +85,7 @@ function App() {
       </header>
       <div className="main-content-cards">
         <WeatherDisplay />
+        <AqiDisplay />
         <AlertSummaryCard />
       </div>
       <main>

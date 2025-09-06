@@ -3,11 +3,12 @@ init_paths()
 
 from typing import Dict
 import azure.functions as func
-import datetime
 import json
 import logging
 import requests
 import os
+
+from shared_utils import init_headers
 
 ROUTE_ID = os.environ.get("ROUTE_ID", "100479")  # the 1 Line
 DISRUPTIVE = {
@@ -34,19 +35,12 @@ def _filter_alerts(alerts_data: dict, route_id: str) -> list:
             filtered_results.append(alert)
     return filtered_results
 
-def _init_headers(req: func.HttpRequest) -> Dict[str, str]:
-    headers = {}
-    origin = req.headers.get('Origin')
-    if origin and '//localhost:' in origin:
-        headers["Access-Control-Allow-Origin"] = "http://localhost:5173"
-    return headers
-
 def main(req: func.HttpRequest) -> func.HttpResponse:
     logging.info('Python HTTP trigger function processed a request.')
 
     alerts_url = "https://s3.amazonaws.com/st-service-alerts-prod/alerts_pb.json"
 
-    headers = _init_headers(req)
+    headers = init_headers()
     
     try:
         response = requests.get(alerts_url)
