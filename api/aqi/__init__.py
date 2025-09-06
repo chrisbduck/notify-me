@@ -88,12 +88,7 @@ def resolve_sensor_id(sensor: str) -> int:
 
 RowDict = Dict[str, Optional[Union[int, float, str]]]
 
-def fetch_sensor_row(
-    api_key: str,
-    sensor_index: int,
-    pm_field: str,
-    max_age_minutes: int,
-) -> Optional[RowDict]:
+def fetch_sensor_row(api_key: str, sensor_index: int, pm_field: str, max_age_minutes: int) -> Optional[RowDict]:
     """
     Query PurpleAir real-time endpoint for a specific sensor.
     Returns a dict mapping field->value for the first (and only) row, or None.
@@ -124,13 +119,11 @@ def fetch_sensor_row(
 
 
 def to_json_response(body: dict, status_code: int = 200) -> func.HttpResponse:
-    return func.HttpResponse(
-        body=json.dumps(body),
-        status_code=status_code,
-        mimetype="application/json",
-        headers={"Cache-Control": "no-store"},
-    )
+    return func.HttpResponse(body=json.dumps(body), status_code=status_code, mimetype="application/json",
+                             headers={"Cache-Control": "no-store"})
 
+def create_json_error(message: str, status_code: int) -> func.HttpResponse:
+    return to_json_response({"error": message}, status_code)
 
 # Azure Functions entrypoint
 def main(req: func.HttpRequest) -> func.HttpResponse:
@@ -141,49 +134,35 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
     try:
         api_key = os.environ.get("PURPLEAIR_API_KEY", "").strip()
         if not api_key:
-            return to_json_response(
-                {"error": "Server is not configured with PURPLEAIR_API_KEY"}, 500
-            )
+            return create_json_error("Server is not configured with PURPLEAIR_API_KEY", 500)
 
         # Parse inputs from query or JSON body
+        payload = {}
         if req.method == "POST":
             try:
                 payload = req.get_json()
             except ValueError:
-                payload = {}
-        else:
-            payload = {}
+                pass
 
-        sensor = (
-            req.params.get("sensor")
-            or payload.get("sensor")
-            or ""
-        )
+        sensor = req.params.get("sensor") or payload.get("sensor") or ""
         if not sensor:
-            return to_json_response({"error": "Missing 'sensor' parameter"}, 400)
+            return create_json_error("Missing 'sensor' parameter", 400)
 
-        pm_field = (
-            req.params.get("pmField")
-            or payload.get("pmField")
-            or "pm2.5_alt"
-        )
+        pm_field = req.params.get("pmField") or payload.get("pmField") or "pm2.5_alt"
         if pm_field not in ("pm2.5_alt", "pm2.5_atm"):
-            return to_json_response(
-                {"error": "pmField must be 'pm2.5_alt' or 'pm2.5_atm'"},
-                400,
-            )
+            return create_json_error("pmField must be 'pm2.5_alt' or 'pm2.5_atm'", 400)
 
         try:
             max_age_minutes = int(req.params.get("maxAgeMinutes") or payload.get("maxAgeMinutes") or 60)
         except ValueError:
-            return to_json_response({"error": "maxAgeMinutes must be an integer"}, 400)
+            return create_json_error("maxAgeMinutes must be an integer", 400)
         if max_age_minutes < 0:
-            return to_json_response({"error": "maxAgeMinutes must be >= 0"}, 400)
+            return create_json_error("maxAgeMinutes must be >= 0", 400)
 
         try:
             sensor_id = resolve_sensor_id(sensor)
         except ValueError as e:
-            return to_json_response({"error": str(e)}, 400)
+            return create_json_error(str(e), 400)
 
         row = fetch_sensor_row(api_key, sensor_id, pm_field, max_age_minutes)
         if not row:
@@ -198,14 +177,12 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
         try:
             pm25 = float(pm25_raw) # type: ignore
         except (TypeError, ValueError):
-            return to_json_response(
-                {
+            data = {
                     "sensor": sensor,
                     "sensor_index": sensor_id,
                     "message": f"No numeric value for {pm_field}",
-                },
-                404,
-            )
+                }
+            return to_json_response(data, 404)
 
         aqi = round(aqi_from_pm25(pm25), 1)
         category: AqiCategory = category_from_aqi(aqi)
@@ -224,6 +201,6 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
 
     except RuntimeError as e:
         # e.g., PurpleAir returned an error body
-        return to_json_response({"error": str(e)}, 502)
+        return create_json_error(str(e), 502)
     except Exception as e:
-        return to_json_response({"error": f"Unexpected error: {e}"}, 500)
+        return create_json_error(f"Unexpected error: {e}", 500)
