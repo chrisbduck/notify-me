@@ -52,7 +52,18 @@ interface GridpointResponse {
             uom: string;
             values: GridpointValue[];
         };
-        // Add other properties if needed, but for now, these are sufficient
+        windSpeed: {
+            uom: string;
+            values: GridpointValue[];
+        };
+        windGust: {
+            uom: string;
+            values: GridpointValue[];
+        };
+        probabilityOfPrecipitation: {
+            uom: string;
+            values: GridpointValue[];
+        };
     };
 }
 
@@ -64,6 +75,13 @@ export interface WeatherData {
     icon: string;
     minTemperature?: number;
     maxTemperature?: number;
+    windSpeed?: number;
+    windGust?: number;
+    averageWindSpeed?: number;
+    maxWindSpeed?: number;
+    probabilityOfPrecipitation?: number;
+    precipitationType?: string;
+    precipitationStartTime?: Date;
 }
 
 const parseDuration = (duration: string): number => {
@@ -177,10 +195,23 @@ const fetchWeatherData = async (latitude: number, longitude: number, targetTime:
 
         const { temperature, shortForecast, icon } = getWeatherDetailsAtTime(properties, targetTime);
 
+        const getSpecificValue = (values: GridpointValue[]): number | undefined => {
+            for (const item of values) {
+                const [timeStr, durationStr] = item.validTime.split('/');
+                const validTimeStart = new Date(timeStr);
+                const validTimeEnd = new Date(validTimeStart.getTime() + parseDuration(durationStr));
+                if (targetTime >= validTimeStart && targetTime < validTimeEnd) {
+                    return item.value !== null ? item.value : undefined;
+                }
+            }
+            return undefined;
+        };
+
         const getDailyMinMax = (values: GridpointValue[], type: 'min' | 'max'): number | undefined => {
             let dailyValue: number | undefined;
             for (const item of values) {
-                const validTimeStart = new Date(item.validTime.split('/')[0]);
+                const [timeStr] = item.validTime.split('/');
+                const validTimeStart = new Date(timeStr);
                 if (validTimeStart.toISOString().startsWith(today)) {
                     const fahrenheitValue = item.value !== null ? convertCelsiusToFahrenheit(item.value) : undefined;
                     if (fahrenheitValue !== undefined) {
@@ -200,6 +231,53 @@ const fetchWeatherData = async (latitude: number, longitude: number, targetTime:
         const minTemperature = getDailyMinMax(properties.minTemperature.values, 'min');
         const maxTemperature = getDailyMinMax(properties.maxTemperature.values, 'max');
 
+        let averageWindSpeed: number | undefined;
+        let maxWindSpeed: number | undefined;
+        let totalWindSpeed = 0;
+        let windSpeedCount = 0;
+
+        for (const item of properties.windSpeed.values) {
+            const [timeStr] = item.validTime.split('/');
+            const validTimeStart = new Date(timeStr);
+            if (validTimeStart.toISOString().startsWith(today) && item.value !== null) {
+                totalWindSpeed += item.value;
+                windSpeedCount++;
+                if (maxWindSpeed === undefined || item.value > maxWindSpeed) {
+                    maxWindSpeed = item.value;
+                }
+            }
+        }
+        if (windSpeedCount > 0) {
+            averageWindSpeed = totalWindSpeed / windSpeedCount;
+        }
+
+        const windSpeed = getSpecificValue(properties.windSpeed.values);
+        const windGust = getSpecificValue(properties.windGust.values);
+        const probabilityOfPrecipitation = getSpecificValue(properties.probabilityOfPrecipitation.values);
+
+        let precipitationType: string | undefined = undefined;
+        let precipitationStartTime: Date | undefined = undefined;
+
+        for (const item of properties.probabilityOfPrecipitation.values) {
+            const [timeStr] = item.validTime.split('/');
+            const validTimeStart = new Date(timeStr);
+
+            if (validTimeStart.toISOString().startsWith(today) && item.value && item.value > 0) {
+                const weatherAtPrecipitationTime = properties.weather.values.find(weatherItem => {
+                    const [weatherTimeStr, weatherDurationStr] = weatherItem.validTime.split('/');
+                    const weatherValidTimeStart = new Date(weatherTimeStr);
+                    const weatherValidTimeEnd = new Date(weatherValidTimeStart.getTime() + parseDuration(weatherDurationStr));
+                    return validTimeStart >= weatherValidTimeStart && validTimeStart < weatherValidTimeEnd;
+                });
+
+                if (weatherAtPrecipitationTime && weatherAtPrecipitationTime.value.length > 0 && weatherAtPrecipitationTime.value[0].weather) {
+                    precipitationType = weatherAtPrecipitationTime.value[0].weather;
+                    precipitationStartTime = validTimeStart;
+                    break;
+                }
+            }
+        }
+
         return {
             city: city,
             temperature: temperature !== undefined ? temperature : 0,
@@ -208,12 +286,18 @@ const fetchWeatherData = async (latitude: number, longitude: number, targetTime:
             icon: icon,
             minTemperature: minTemperature,
             maxTemperature: maxTemperature,
+            windSpeed: windSpeed,
+            windGust: windGust,
+            averageWindSpeed: averageWindSpeed,
+            maxWindSpeed: maxWindSpeed,
+            probabilityOfPrecipitation: probabilityOfPrecipitation,
+            precipitationType: precipitationType,
+            precipitationStartTime: precipitationStartTime,
         };
     } catch (error) {
         console.error('Error fetching weather data:', error);
         return null;
     }
 };
-
 export const getKirklandWeather = (targetTime?: Date) => fetchWeatherData(47.6763, -122.2063, targetTime);
 export const getSeattleWeather = (targetTime?: Date) => fetchWeatherData(47.6062, -122.3321, targetTime);

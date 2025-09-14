@@ -3,6 +3,26 @@ import { getSeattleWeather, type WeatherData } from './weatherService';
 import './WeatherDisplay.css';
 import { usePolling } from './hooks/usePolling';
 
+const formatPrecipitationType = (type: string | undefined): string => {
+    if (!type) return 'precipitation';
+    switch (type.toLowerCase()) {
+        case 'rain_showers':
+            return 'rain showers';
+        case 'light_rain':
+            return 'light rain';
+        case 'heavy_rain':
+            return 'heavy rain';
+        case 'snow':
+            return 'snow';
+        case 'sleet':
+            return 'sleet';
+        case 'freezing_rain':
+            return 'freezing rain';
+        default:
+            return type.replace(/_/g, ' ');
+    }
+};
+
 const isBefore2PM = (date: Date): boolean => {
     const twoPM = new Date(date);
     twoPM.setHours(14, 0, 0, 0); // 2 PM local time
@@ -68,6 +88,22 @@ const WeatherCard: React.FC<WeatherCardProps> = ({ city, currentWeather, forecas
             </div>
             {currentWeather.minTemperature !== undefined && currentWeather.maxTemperature !== undefined && (
                 <p>Min/Max: {currentWeather.minTemperature}°{currentWeather.temperatureUnit} / {currentWeather.maxTemperature}°{currentWeather.temperatureUnit}</p>
+            )}
+            {currentWeather.averageWindSpeed !== undefined && currentWeather.maxWindSpeed !== undefined && (
+                <p>Wind: Avg {currentWeather.averageWindSpeed.toFixed(1)} mph / Max {currentWeather.maxWindSpeed.toFixed(1)} mph</p>
+            )}
+            {currentWeather.probabilityOfPrecipitation !== undefined && currentWeather.probabilityOfPrecipitation > 0 && (
+                <p>Chance of {currentWeather.precipitationType || 'precipitation'}: {currentWeather.probabilityOfPrecipitation}%
+                    {currentWeather.precipitationStartTime && ` (starts around ${currentWeather.precipitationStartTime.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' })})`}
+                </p>
+            )}
+            {currentWeather.averageWindSpeed !== undefined && currentWeather.maxWindSpeed !== undefined && (
+                <p>Wind: Avg {currentWeather.averageWindSpeed.toFixed(1)} mph / Max {currentWeather.maxWindSpeed.toFixed(1)} mph</p>
+            )}
+            {currentWeather.probabilityOfPrecipitation !== undefined && currentWeather.probabilityOfPrecipitation > 0 && (
+                <p>Chance of {formatPrecipitationType(currentWeather.precipitationType)}: {currentWeather.probabilityOfPrecipitation}%
+                    {currentWeather.precipitationStartTime && ` (starts around ${currentWeather.precipitationStartTime.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' })})`}
+                </p>
             )}
         </div>
     );
