@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState } from 'react';
 import './App.css';
 import AlertRow from './AlertRow';
 import WeatherDisplay from './WeatherDisplay';
@@ -6,6 +6,7 @@ import AlertSummaryCard from './AlertSummaryCard';
 import AqiDisplay from './AqiDisplay';
 import { fetchAndProcessAlerts } from './alertService';
 import { type AlertModel } from './model';
+import { usePolling } from './hooks/usePolling';
 
 function App() {
   const [alerts, setAlerts] = useState<AlertModel[]>([]);
@@ -13,22 +14,13 @@ function App() {
   const [error, setError] = useState<string | null>(null);
   const [lastFetched, setLastFetched] = useState<string | null>(null);
 
-  const lastFetchTimestamp = useRef<number>(0); // Store timestamp of last fetch
-  const intervalIdRef = useRef<number | null>(null); // Store interval ID
-  const refreshQueued = useRef<boolean>(false); // Track if a refresh is queued
-
-  const getAlerts = async () => {
-    // Prevent re-fetch within 60 seconds
-    const now = Date.now();
-    if (now - lastFetchTimestamp.current < 60000 && lastFetchTimestamp.current !== 0) return;
-
+  const fetchAlerts = async () => {
     setLoading(true);
     setError(null);
     try {
       const alerts: AlertModel[] = await fetchAndProcessAlerts();
       setAlerts(alerts);
       setLastFetched(new Date().toLocaleTimeString());
-      lastFetchTimestamp.current = now;
     } catch (err) {
       setError("Failed to fetch alerts.");
       console.error("Error fetching alerts:", err);
@@ -37,45 +29,7 @@ function App() {
     }
   };
 
-  useEffect(() => {
-    getAlerts(); // Initial fetch
-
-    const startInterval = () => {
-      if (intervalIdRef.current !== null) {
-        clearInterval(intervalIdRef.current);
-      }
-      intervalIdRef.current = setInterval(getAlerts, 60000) as unknown as number;
-    };
-
-    const stopInterval = () => {
-      if (intervalIdRef.current !== null) {
-        clearInterval(intervalIdRef.current);
-        intervalIdRef.current = null;
-      }
-    };
-
-    const handleVisibilityChange = () => {
-      if (document.visibilityState === 'visible') {
-        startInterval();
-        if (refreshQueued.current) {
-          getAlerts();
-          refreshQueued.current = false;
-        }
-      } else {
-        stopInterval();
-        refreshQueued.current = true; // Queue a refresh for when the tab becomes visible
-      }
-    };
-
-    startInterval(); // Start interval on mount
-
-    document.addEventListener('visibilitychange', handleVisibilityChange);
-
-    return () => {
-      stopInterval();
-      document.removeEventListener('visibilitychange', handleVisibilityChange);
-    };
-  }, []);
+  usePolling(fetchAlerts, 60000);
 
   return (
     <div className="App">
