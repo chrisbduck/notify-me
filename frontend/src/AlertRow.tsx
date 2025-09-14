@@ -1,17 +1,16 @@
 import React, { useState } from 'react';
 import './AlertRow.css';
-import { FaExclamationTriangle, FaInfoCircle, FaTimesCircle, FaChevronDown, FaChevronUp } from 'react-icons/fa';
+import { FaExclamationTriangle, FaInfoCircle, FaChevronDown, FaChevronUp } from 'react-icons/fa';
 import { Severity, type AlertModel } from './model';
 
 const renderSeverityIcon = (severity?: Severity) => {
   switch (severity) {
     case Severity.WARNING:
-      return <FaExclamationTriangle className="alert-icon warning-icon" />;
     case Severity.INFO:
     default:
       return <FaInfoCircle className="alert-icon info-icon" />;
     case Severity.SEVERE:
-      return <FaTimesCircle className="alert-icon severe-icon" />;
+      return <FaExclamationTriangle className="alert-icon severe-icon" />;
   }
 };
 
