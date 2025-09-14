@@ -1,6 +1,7 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import { getSeattleWeather, type WeatherData } from './weatherService';
 import './WeatherDisplay.css';
+import { usePolling } from './hooks/usePolling';
 
 const isBefore2PM = (date: Date): boolean => {
     const twoPM = new Date(date);
@@ -74,35 +75,17 @@ const WeatherCard: React.FC<WeatherCardProps> = ({ city, currentWeather, forecas
 
 const WeatherDisplay: React.FC = () => {
     const [seattleWeather, setSeattleWeather] = useState<WeatherData | null>(null);
-
-    useEffect(() => {
-        const fetchWeather = async () => {
-            setSeattleWeather(await getSeattleWeather());
-        };
-
-        fetchWeather();
-        const interval = setInterval(fetchWeather, 300000); // Refresh every 5 minutes
-
-        return () => clearInterval(interval);
-    }, []);
-
     const [seattleWeather4pm, setSeattleWeather4pm] = useState<WeatherData | null>(null);
     const currentTime = new Date();
 
-    useEffect(() => {
-        const fetchWeather = async () => {
-            setSeattleWeather(await getSeattleWeather());
-
-            const fourPM = new Date();
-            fourPM.setHours(16, 0, 0, 0); // 4 PM local time
-            setSeattleWeather4pm(await getSeattleWeather(fourPM));
-        };
-
-        fetchWeather();
-        const interval = setInterval(fetchWeather, 300000); // Refresh every 5 minutes
-
-        return () => clearInterval(interval);
+    const fetchSeattleWeather = useCallback(async () => {
+        setSeattleWeather(await getSeattleWeather());
+        const fourPM = new Date();
+        fourPM.setHours(16, 0, 0, 0); // 4 PM local time
+        setSeattleWeather4pm(await getSeattleWeather(fourPM));
     }, []);
+
+    usePolling(fetchSeattleWeather, 300000); // Refresh every 5 minutes
 
     return (
         <div className="weather-display-container">
