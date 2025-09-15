@@ -1,27 +1,8 @@
-import React, { useEffect, useState } from 'react';
 import { FaCheckCircle, FaExclamationTriangle } from 'react-icons/fa';
-import { fetchAndProcessAlerts } from './alertService';
 import { Severity, type AlertModel } from './model';
 import './WeatherDisplay.css'; // Reusing the card styling
 
-const AlertSummaryCard: React.FC = () => {
-    const [alerts, setAlerts] = useState<AlertModel[]>([]);
-    const [loading, setLoading] = useState<boolean>(true);
-
-    useEffect(() => {
-        const getAlerts = async () => {
-            setLoading(true);
-            const fetchedAlerts = await fetchAndProcessAlerts();
-            setAlerts(fetchedAlerts);
-            setLoading(false);
-        };
-
-        getAlerts();
-        const interval = setInterval(getAlerts, 60000); // Refresh every minute
-
-        return () => clearInterval(interval);
-    }, []);
-
+function AlertSummaryCard({ loading, alerts }: { loading: boolean, alerts: AlertModel[] }) {
     if (loading) {
         return (
             <div className="weather-card"> {/* Reusing weather-card styling */}

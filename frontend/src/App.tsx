@@ -1,12 +1,12 @@
 import { useState } from 'react';
 import './App.css';
-import AlertRow from './AlertRow';
 import WeatherDisplay from './WeatherDisplay';
 import AlertSummaryCard from './AlertSummaryCard';
 import AqiDisplay from './AqiDisplay';
 import { fetchAndProcessAlerts } from './alertService';
 import { type AlertModel } from './model';
 import { usePolling } from './hooks/usePolling';
+import { TransitAlertsSection } from './TransitAlertsSection';
 
 function App() {
   const [alerts, setAlerts] = useState<AlertModel[]>([]);
@@ -34,26 +34,17 @@ function App() {
   return (
     <div className="App">
       <header className="App-header">
-        <h1>Sound Transit Alerts</h1>
+        <h1>Alerts for Chris</h1>
         {loading ? <p>Loading alerts...</p> : lastFetched && <p>Last updated: {lastFetched}</p>}
       </header>
       <div className="main-content-cards">
-        <AlertSummaryCard />
+        <AlertSummaryCard loading={loading} alerts={alerts} />
         <WeatherDisplay />
         <AqiDisplay />
       </div>
       <main>
         {error && <p style={{ color: 'red' }}>{error}</p>}
-        {!loading && !error && alerts.length === 0 && (
-          <p>No active alerts.</p>
-        )}
-        {alerts.length > 0 && (
-          <div className="alerts-list">
-            {alerts.map((alert, index) => (
-              <AlertRow key={alert.header_text.translation[0]?.text || index} alert={alert} />
-            ))}
-          </div>
-        )}
+        <TransitAlertsSection loading={loading} alerts={alerts} />
       </main>
     </div>
   );
