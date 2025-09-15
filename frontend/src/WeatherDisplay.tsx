@@ -1,5 +1,5 @@
 import React from 'react';
-import { formatPrecipitationType, type WeatherData } from './weatherService';
+import { formatPrecipitationType, getWindDescription, type WeatherData } from './weatherService';
 import './WeatherDisplay.css';
 
 interface WeatherDetailsProps {
@@ -24,13 +24,14 @@ function MinMaxTemperatureDisplay({ minTemperature, maxTemperature, temperatureU
 
 function WindDisplay({ averageWindSpeed, maxWindSpeed }: { averageWindSpeed?: number; maxWindSpeed?: number }) {
     if (averageWindSpeed === undefined || maxWindSpeed === undefined) return null;
-    return <p>Wind: Avg {averageWindSpeed.toFixed(1)} mph / Max {maxWindSpeed.toFixed(1)} mph</p>;
+    if (maxWindSpeed < 20) return null; // don't display anything for light winds
+    const description = getWindDescription(maxWindSpeed);
+    return <p>{description}: {averageWindSpeed.toFixed(1)} / {maxWindSpeed.toFixed(1)} mph</p>;
 }
 
 function PrecipitationDisplay({ probabilityOfPrecipitation, precipitationType, precipitationStartTime }: { probabilityOfPrecipitation?: number; precipitationType?: string; precipitationStartTime?: Date }) {
     if (probabilityOfPrecipitation === undefined || probabilityOfPrecipitation <= 0) return null;
-    const startText = (precipitationStartTime && precipitationStartTime < new Date()) ? 'started' : 'starts';
-    const startTimeString = precipitationStartTime ? ` (${startText} around ${precipitationStartTime.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' })})` : '';
+    const startTimeString = precipitationStartTime ? ` (~${precipitationStartTime.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' })})` : '';
     return <p>{formatPrecipitationType(precipitationType)}: {probabilityOfPrecipitation}%{startTimeString}</p>;
 }
 
@@ -45,7 +46,7 @@ const WeatherCard: React.FC<WeatherCardProps> = ({ city, currentWeather, forecas
     if (!currentWeather) {
         return (
             <div className="weather-card">
-                <h3>{city}</h3>
+                <h3 className="weather-title">{city}</h3>
                 <p>Loading weather...</p>
             </div>
         );
@@ -53,7 +54,7 @@ const WeatherCard: React.FC<WeatherCardProps> = ({ city, currentWeather, forecas
 
     return (
         <div className="weather-card">
-            <h3>{city}</h3>
+            <h3 className="weather-title">{city}</h3>
             <div className="weather-details-container">
                 <div className="weather-details-column">
                     <h4>Now</h4>

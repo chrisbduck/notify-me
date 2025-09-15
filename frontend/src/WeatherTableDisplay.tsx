@@ -1,5 +1,5 @@
 import React from 'react';
-import { formatPrecipitationType, type WeatherData } from './weatherService';
+import { formatPrecipitationType, getWindDescription, type WeatherData } from './weatherService';
 import './WeatherTableDisplay.css';
 
 interface WeatherTableDisplayProps {
@@ -14,11 +14,7 @@ const WeatherTableDisplay: React.FC<WeatherTableDisplayProps> = ({ currentWeathe
 
     const weatherAttributes = [
         {
-            label: 'Icon',
-            render: (weather: WeatherData) => <img src={weather.icon} alt={weather.shortForecast} className="weather-table-icon" />,
-        },
-        {
-            label: 'Temperature',
+            label: 'Current temperature',
             render: (weather: WeatherData) => `${weather.temperature}°${weather.temperatureUnit}`,
         },
         {
@@ -26,18 +22,19 @@ const WeatherTableDisplay: React.FC<WeatherTableDisplayProps> = ({ currentWeathe
             render: (weather: WeatherData) => weather.shortForecast,
         },
         {
-            label: 'Min/Max Temp',
+            label: 'Temperature range',
             render: (weather: WeatherData) =>
                 weather.minTemperature !== undefined && weather.maxTemperature !== undefined
-                    ? `${weather.minTemperature}°${weather.temperatureUnit} / ${weather.maxTemperature}°${weather.temperatureUnit}`
+                    ? `${weather.minTemperature}°${weather.temperatureUnit} - ${weather.maxTemperature}°${weather.temperatureUnit}`
                     : 'N/A',
         },
         {
             label: 'Wind',
-            render: (weather: WeatherData) =>
-                weather.averageWindSpeed !== undefined && weather.maxWindSpeed !== undefined
-                    ? `Avg ${weather.averageWindSpeed.toFixed(1)} mph / Max ${weather.maxWindSpeed.toFixed(1)} mph`
-                    : 'N/A',
+            render: (weather: WeatherData) => {
+                if (weather.averageWindSpeed === undefined || weather.maxWindSpeed === undefined) return 'N/A';
+                const description = getWindDescription(weather.maxWindSpeed);
+                return `${description} (Avg ${weather.averageWindSpeed.toFixed(1)} mph / Max ${weather.maxWindSpeed.toFixed(1)} mph)`;
+            },
         },
         {
             label: 'Precipitation',

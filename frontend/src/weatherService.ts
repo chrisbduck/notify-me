@@ -192,6 +192,22 @@ export const formatPrecipitationType = (type: string | undefined): string => {
     }
 };
 
+export function getWindDescription(maxSpeed: number): string {
+    if (maxSpeed < 1) return 'Calm';
+    if (maxSpeed <= 3) return 'Light air';
+    if (maxSpeed <= 7) return 'Light breeze';
+    if (maxSpeed <= 12) return 'Gentle breeze';
+    if (maxSpeed <= 18) return 'Moderate breeze';
+    if (maxSpeed <= 24) return 'Fresh breeze';
+    if (maxSpeed <= 31) return 'Strong breeze';
+    if (maxSpeed <= 38) return 'Near gale';
+    if (maxSpeed <= 46) return 'Gale';
+    if (maxSpeed <= 54) return 'Strong gale';
+    if (maxSpeed <= 63) return 'Storm';
+    if (maxSpeed <= 72) return 'Violent storm';
+    return 'Hurricane';
+}
+
 export const isBefore2PM = (date: Date): boolean => {
     const twoPM = new Date(date);
     twoPM.setHours(14, 0, 0, 0); // 2 PM local time

@@ -43,11 +43,14 @@
   font-size: 0.9em;
 }
 
+.weather-title {
+  margin-bottom: 8px;
+}
+
 .weather-details-container {
   display: flex;
   justify-content: space-evenly; /* Distribute space evenly */
   align-items: flex-start;
-  margin-bottom: 10px;
   flex-grow: 1; /* Allow this container to grow and fill space */
 }
 
