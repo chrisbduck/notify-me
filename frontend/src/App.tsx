@@ -1,6 +1,6 @@
 import { useState, useCallback } from 'react';
 import './App.css';
-import WeatherDisplay from './WeatherDisplay';
+import WeatherCardDisplay from './WeatherCardDisplay';
 import AlertSummaryCard from './AlertSummaryCard';
 import AqiDisplay from './AqiDisplay';
 import { fetchAndProcessAlerts } from './alertService';
@@ -54,7 +54,7 @@ function App() {
       </header>
       <div className="main-content-cards">
         <AlertSummaryCard loading={loading} alerts={alerts} />
-        <WeatherDisplay
+        <WeatherCardDisplay
           currentWeather={seattleWeather}
           forecast4pm={seattleWeather4pm}
           show4pmForecast={isBefore2PM(currentTime)}

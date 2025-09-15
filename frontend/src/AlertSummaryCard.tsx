@@ -1,6 +1,6 @@
 import { FaCheckCircle, FaExclamationTriangle } from 'react-icons/fa';
 import { Severity, type AlertModel } from './model';
-import './WeatherDisplay.css'; // Reusing the card styling
+import './WeatherCardDisplay.css'; // Reusing the card styling
 
 function AlertSummaryCard({ loading, alerts }: { loading: boolean, alerts: AlertModel[] }) {
     if (loading) {

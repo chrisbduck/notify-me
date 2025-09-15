@@ -1,6 +1,6 @@
 import React from 'react';
 import { formatPrecipitationType, getWindDescription, type WeatherData } from './weatherService';
-import './WeatherDisplay.css';
+import './WeatherCardDisplay.css';
 
 interface WeatherDetailsProps {
     icon: string;
@@ -84,13 +84,13 @@ const WeatherCard: React.FC<WeatherCardProps> = ({ city, currentWeather, forecas
     );
 };
 
-interface WeatherDisplayProps {
+interface WeatherCardDisplayProps {
     currentWeather: WeatherData | null;
     forecast4pm: WeatherData | null;
     show4pmForecast: boolean;
 }
 
-const WeatherDisplay: React.FC<WeatherDisplayProps> = ({ currentWeather, forecast4pm, show4pmForecast }) => {
+const WeatherCardDisplay: React.FC<WeatherCardDisplayProps> = ({ currentWeather, forecast4pm, show4pmForecast }) => {
     return (
         <div className="weather-display-container">
             <WeatherCard
@@ -103,4 +103,4 @@ const WeatherDisplay: React.FC<WeatherDisplayProps> = ({ currentWeather, forecas
     );
 };
 
-export default WeatherDisplay;
+export default WeatherCardDisplay;
