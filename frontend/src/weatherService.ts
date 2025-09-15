@@ -172,6 +172,32 @@ const getWeatherDetailsAtTime = (
     };
 };
 
+export const formatPrecipitationType = (type: string | undefined): string => {
+    if (!type) return 'precipitation';
+    switch (type.toLowerCase()) {
+        case 'rain_showers':
+            return 'rain showers';
+        case 'light_rain':
+            return 'light rain';
+        case 'heavy_rain':
+            return 'heavy rain';
+        case 'snow':
+            return 'snow';
+        case 'sleet':
+            return 'sleet';
+        case 'freezing_rain':
+            return 'freezing rain';
+        default:
+            return type.replace(/_/g, ' ');
+    }
+};
+
+export const isBefore2PM = (date: Date): boolean => {
+    const twoPM = new Date(date);
+    twoPM.setHours(14, 0, 0, 0); // 2 PM local time
+    return date.getTime() < twoPM.getTime();
+};
+
 const fetchWeatherData = async (latitude: number, longitude: number, targetTime: Date = new Date()): Promise<WeatherData | null> => {
     try {
         const pointResponse = await fetch(`${NWS_API_BASE_URL}/points/${latitude},${longitude}`,

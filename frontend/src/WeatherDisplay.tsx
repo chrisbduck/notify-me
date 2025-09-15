@@ -1,33 +1,6 @@
-import React, { useState, useCallback } from 'react';
-import { getSeattleWeather, type WeatherData } from './weatherService';
+import React from 'react';
+import { formatPrecipitationType, type WeatherData } from './weatherService';
 import './WeatherDisplay.css';
-import { usePolling } from './hooks/usePolling';
-
-const formatPrecipitationType = (type: string | undefined): string => {
-    if (!type) return 'precipitation';
-    switch (type.toLowerCase()) {
-        case 'rain_showers':
-            return 'rain showers';
-        case 'light_rain':
-            return 'light rain';
-        case 'heavy_rain':
-            return 'heavy rain';
-        case 'snow':
-            return 'snow';
-        case 'sleet':
-            return 'sleet';
-        case 'freezing_rain':
-            return 'freezing rain';
-        default:
-            return type.replace(/_/g, ' ');
-    }
-};
-
-const isBefore2PM = (date: Date): boolean => {
-    const twoPM = new Date(date);
-    twoPM.setHours(14, 0, 0, 0); // 2 PM local time
-    return date.getTime() < twoPM.getTime();
-};
 
 interface WeatherDetailsProps {
     icon: string;
@@ -93,14 +66,6 @@ const WeatherCard: React.FC<WeatherCardProps> = ({ city, currentWeather, forecas
                 <p>Wind: Avg {currentWeather.averageWindSpeed.toFixed(1)} mph / Max {currentWeather.maxWindSpeed.toFixed(1)} mph</p>
             )}
             {currentWeather.probabilityOfPrecipitation !== undefined && currentWeather.probabilityOfPrecipitation > 0 && (
-                <p>Chance of {currentWeather.precipitationType || 'precipitation'}: {currentWeather.probabilityOfPrecipitation}%
-                    {currentWeather.precipitationStartTime && ` (starts around ${currentWeather.precipitationStartTime.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' })})`}
-                </p>
-            )}
-            {currentWeather.averageWindSpeed !== undefined && currentWeather.maxWindSpeed !== undefined && (
-                <p>Wind: Avg {currentWeather.averageWindSpeed.toFixed(1)} mph / Max {currentWeather.maxWindSpeed.toFixed(1)} mph</p>
-            )}
-            {currentWeather.probabilityOfPrecipitation !== undefined && currentWeather.probabilityOfPrecipitation > 0 && (
                 <p>Chance of {formatPrecipitationType(currentWeather.precipitationType)}: {currentWeather.probabilityOfPrecipitation}%
                     {currentWeather.precipitationStartTime && ` (starts around ${currentWeather.precipitationStartTime.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' })})`}
                 </p>
@@ -109,27 +74,20 @@ const WeatherCard: React.FC<WeatherCardProps> = ({ city, currentWeather, forecas
     );
 };
 
-const WeatherDisplay: React.FC = () => {
-    const [seattleWeather, setSeattleWeather] = useState<WeatherData | null>(null);
-    const [seattleWeather4pm, setSeattleWeather4pm] = useState<WeatherData | null>(null);
-    const currentTime = new Date();
+interface WeatherDisplayProps {
+    currentWeather: WeatherData | null;
+    forecast4pm: WeatherData | null;
+    show4pmForecast: boolean;
+}
 
-    const fetchSeattleWeather = useCallback(async () => {
-        setSeattleWeather(await getSeattleWeather());
-        const fourPM = new Date();
-        fourPM.setHours(16, 0, 0, 0); // 4 PM local time
-        setSeattleWeather4pm(await getSeattleWeather(fourPM));
-    }, []);
-
-    usePolling(fetchSeattleWeather, 300000); // Refresh every 5 minutes
-
+const WeatherDisplay: React.FC<WeatherDisplayProps> = ({ currentWeather, forecast4pm, show4pmForecast }) => {
     return (
         <div className="weather-display-container">
             <WeatherCard
                 city="Seattle, WA"
-                currentWeather={seattleWeather}
-                forecast4pm={seattleWeather4pm}
-                show4pmForecast={isBefore2PM(currentTime)}
+                currentWeather={currentWeather}
+                forecast4pm={forecast4pm}
+                show4pmForecast={show4pmForecast}
             />
         </div>
     );

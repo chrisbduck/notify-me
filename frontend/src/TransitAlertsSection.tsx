@@ -8,7 +8,7 @@ export function TransitAlertsSection({ loading, alerts }: { loading: boolean; al
         <p>No active alerts.</p>
     ) : (
         <>
-            <h1>Sound Transit Alerts</h1>
+            <h2>Sound Transit Alerts</h2>
             <div className="alerts-list">
                 {alerts.map((alert, index) => (
                     <AlertRow key={alert.header_text.translation[0]?.text || index} alert={alert} />
