@@ -17,6 +17,23 @@ const WeatherDetails: React.FC<WeatherDetailsProps> = ({ icon, temperature, temp
     </div>
 );
 
+function MinMaxTemperatureDisplay({ minTemperature, maxTemperature, temperatureUnit }: { minTemperature?: number; maxTemperature?: number; temperatureUnit?: string }) {
+    if (minTemperature === undefined || temperatureUnit === undefined) return null;
+    return <p>Min/Max: {minTemperature}°{temperatureUnit} / {maxTemperature}°{temperatureUnit}</p>;
+}
+
+function WindDisplay({ averageWindSpeed, maxWindSpeed }: { averageWindSpeed?: number; maxWindSpeed?: number }) {
+    if (averageWindSpeed === undefined || maxWindSpeed === undefined) return null;
+    return <p>Wind: Avg {averageWindSpeed.toFixed(1)} mph / Max {maxWindSpeed.toFixed(1)} mph</p>;
+}
+
+function PrecipitationDisplay({ probabilityOfPrecipitation, precipitationType, precipitationStartTime }: { probabilityOfPrecipitation?: number; precipitationType?: string; precipitationStartTime?: Date }) {
+    if (probabilityOfPrecipitation === undefined || probabilityOfPrecipitation <= 0) return null;
+    const startText = (precipitationStartTime && precipitationStartTime < new Date()) ? 'started' : 'starts';
+    const startTimeString = precipitationStartTime ? ` (${startText} around ${precipitationStartTime.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' })})` : '';
+    return <p>{formatPrecipitationType(precipitationType)}: {probabilityOfPrecipitation}%{startTimeString}</p>;
+}
+
 interface WeatherCardProps {
     city: string;
     currentWeather: WeatherData | null;
@@ -59,17 +76,9 @@ const WeatherCard: React.FC<WeatherCardProps> = ({ city, currentWeather, forecas
                     </div>
                 )}
             </div>
-            {currentWeather.minTemperature !== undefined && currentWeather.maxTemperature !== undefined && (
-                <p>Min/Max: {currentWeather.minTemperature}°{currentWeather.temperatureUnit} / {currentWeather.maxTemperature}°{currentWeather.temperatureUnit}</p>
-            )}
-            {currentWeather.averageWindSpeed !== undefined && currentWeather.maxWindSpeed !== undefined && (
-                <p>Wind: Avg {currentWeather.averageWindSpeed.toFixed(1)} mph / Max {currentWeather.maxWindSpeed.toFixed(1)} mph</p>
-            )}
-            {currentWeather.probabilityOfPrecipitation !== undefined && currentWeather.probabilityOfPrecipitation > 0 && (
-                <p>{formatPrecipitationType(currentWeather.precipitationType)}: {currentWeather.probabilityOfPrecipitation}%
-                    {currentWeather.precipitationStartTime && ` (~${currentWeather.precipitationStartTime.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' })})`}
-                </p>
-            )}
+            <MinMaxTemperatureDisplay minTemperature={currentWeather.minTemperature} maxTemperature={currentWeather.maxTemperature} temperatureUnit={currentWeather.temperatureUnit} />
+            <WindDisplay averageWindSpeed={currentWeather.averageWindSpeed} maxWindSpeed={currentWeather.maxWindSpeed} />
+            <PrecipitationDisplay precipitationStartTime={currentWeather.precipitationStartTime} precipitationType={currentWeather.precipitationType} probabilityOfPrecipitation={currentWeather.probabilityOfPrecipitation} />
         </div>
     );
 };
