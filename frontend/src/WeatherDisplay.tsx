@@ -66,8 +66,8 @@ const WeatherCard: React.FC<WeatherCardProps> = ({ city, currentWeather, forecas
                 <p>Wind: Avg {currentWeather.averageWindSpeed.toFixed(1)} mph / Max {currentWeather.maxWindSpeed.toFixed(1)} mph</p>
             )}
             {currentWeather.probabilityOfPrecipitation !== undefined && currentWeather.probabilityOfPrecipitation > 0 && (
-                <p>Chance of {formatPrecipitationType(currentWeather.precipitationType)}: {currentWeather.probabilityOfPrecipitation}%
-                    {currentWeather.precipitationStartTime && ` (starts around ${currentWeather.precipitationStartTime.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' })})`}
+                <p>{formatPrecipitationType(currentWeather.precipitationType)}: {currentWeather.probabilityOfPrecipitation}%
+                    {currentWeather.precipitationStartTime && ` (~${currentWeather.precipitationStartTime.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' })})`}
                 </p>
             )}
         </div>

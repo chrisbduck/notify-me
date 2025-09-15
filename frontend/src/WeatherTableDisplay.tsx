@@ -41,10 +41,13 @@ const WeatherTableDisplay: React.FC<WeatherTableDisplayProps> = ({ currentWeathe
         },
         {
             label: 'Precipitation',
-            render: (weather: WeatherData) =>
-                weather.probabilityOfPrecipitation !== undefined && weather.probabilityOfPrecipitation > 0
-                    ? `${formatPrecipitationType(weather.precipitationType)}: ${weather.probabilityOfPrecipitation}%`
-                    : 'N/A',
+            render: (weather: WeatherData) => {
+                if (weather.probabilityOfPrecipitation === undefined || weather.probabilityOfPrecipitation <= 0) return 'None';
+
+                const startText = (weather.precipitationStartTime && weather.precipitationStartTime < new Date()) ? 'started' : 'starts';
+                const startTimeString = weather.precipitationStartTime ? ` (${startText} around ${weather.precipitationStartTime.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' })})` : '';
+                return `${formatPrecipitationType(weather.precipitationType)}: ${weather.probabilityOfPrecipitation}%${startTimeString}`;
+            },
         },
     ];
 
