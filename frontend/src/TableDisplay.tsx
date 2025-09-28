@@ -4,6 +4,7 @@ import './TableDisplay.css';
 export interface TableAttribute<T> {
     label: string;
     render: (item: T) => React.ReactNode;
+    firstColSpan?: number;
 }
 
 interface TableDisplayProps<T> {
@@ -28,13 +29,16 @@ const TableDisplay = <T,>({ dataNow, dataLater, attributes, laterColumnHeader }:
                 </tr>
             </thead>
             <tbody>
-                {attributes.map((attribute, index) => (
-                    <tr key={index}>
-                        <td><strong>{attribute.label}</strong></td>
-                        <td>{dataNow ? attribute.render(dataNow) : 'N/A'}</td>
-                        {dataLater && <td>{attribute.render(dataLater)}</td>}
-                    </tr>
-                ))}
+                {attributes.map((attribute, index) => {
+                    const firstColSpan = attribute.firstColSpan ?? 1;
+                    return (
+                        <tr key={index}>
+                            <td><strong>{attribute.label}</strong></td>
+                            <td colSpan={firstColSpan}>{dataNow ? attribute.render(dataNow) : 'N/A'}</td>
+                            {dataLater && firstColSpan === 1 ? <td>{attribute.render(dataLater)}</td> : null}
+                        </tr>
+                    );
+                })}
             </tbody>
         </table>
     );

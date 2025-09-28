@@ -18,13 +18,14 @@ function App() {
 
   const [seattleWeather, setSeattleWeather] = useState<WeatherData | null>(null);
   const [seattleWeather4pm, setSeattleWeather4pm] = useState<WeatherData | null>(null);
-  const currentTime = new Date();
 
   const fetchSeattleWeather = useCallback(async () => {
     setSeattleWeather(await getSeattleWeather());
-    const fourPM = new Date();
-    fourPM.setHours(16, 0, 0, 0); // 4 PM local time
-    setSeattleWeather4pm(await getSeattleWeather(fourPM));
+    if (isBefore2PM()) {
+      const fourPM = new Date();
+      fourPM.setHours(16, 0, 0, 0); // 4 PM local time
+      setSeattleWeather4pm(await getSeattleWeather(fourPM));
+    }
   }, []);
 
   usePolling(fetchSeattleWeather, 300000); // Refresh every 5 minutes
@@ -57,13 +58,12 @@ function App() {
         <WeatherCardDisplay
           currentWeather={seattleWeather}
           forecast4pm={seattleWeather4pm}
-          show4pmForecast={isBefore2PM(currentTime)}
         />
         <AqiDisplay />
       </div>
       <main>
         {error && <p style={{ color: 'red' }}>{error}</p>}
-        <WeatherDetailsSection currentWeather={seattleWeather} forecast4pm={seattleWeather4pm} currentTime={currentTime} />
+        <WeatherDetailsSection currentWeather={seattleWeather} forecast4pm={seattleWeather4pm} />
         <TransitAlertsSection loading={loading} alerts={alerts} />
       </main>
     </div>

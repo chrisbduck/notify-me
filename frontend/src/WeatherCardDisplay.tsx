@@ -39,10 +39,9 @@ interface WeatherCardProps {
     city: string;
     currentWeather: WeatherData | null;
     forecast4pm: WeatherData | null;
-    show4pmForecast: boolean;
 }
 
-const WeatherCard: React.FC<WeatherCardProps> = ({ city, currentWeather, forecast4pm, show4pmForecast }) => {
+const WeatherCard: React.FC<WeatherCardProps> = ({ city, currentWeather, forecast4pm }) => {
     if (!currentWeather) {
         return (
             <div className="weather-card">
@@ -65,7 +64,7 @@ const WeatherCard: React.FC<WeatherCardProps> = ({ city, currentWeather, forecas
                         shortForecast={currentWeather.shortForecast}
                     />
                 </div>
-                {show4pmForecast && forecast4pm && (
+                {forecast4pm && (
                     <div className="weather-details-column">
                         <h4>4 PM</h4>
                         <WeatherDetails
@@ -87,17 +86,15 @@ const WeatherCard: React.FC<WeatherCardProps> = ({ city, currentWeather, forecas
 interface WeatherCardDisplayProps {
     currentWeather: WeatherData | null;
     forecast4pm: WeatherData | null;
-    show4pmForecast: boolean;
 }
 
-const WeatherCardDisplay: React.FC<WeatherCardDisplayProps> = ({ currentWeather, forecast4pm, show4pmForecast }) => {
+const WeatherCardDisplay: React.FC<WeatherCardDisplayProps> = ({ currentWeather, forecast4pm }) => {
     return (
         <div className="weather-display-container">
             <WeatherCard
                 city="Seattle, WA"
                 currentWeather={currentWeather}
                 forecast4pm={forecast4pm}
-                show4pmForecast={show4pmForecast}
             />
         </div>
     );

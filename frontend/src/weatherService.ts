@@ -208,7 +208,13 @@ export function getWindDescription(maxSpeed: number): string {
     return 'Hurricane';
 }
 
-export const isBefore2PM = (date: Date): boolean => {
+const testMultipleColumns = false; // for debugging
+
+export const isBefore2PM = (date?: Date): boolean => {
+    if (testMultipleColumns) return true;
+
+    if (!date) date = new Date();   // default to now
+
     const twoPM = new Date(date);
     twoPM.setHours(14, 0, 0, 0); // 2 PM local time
     return date.getTime() < twoPM.getTime();

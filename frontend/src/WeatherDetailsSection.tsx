@@ -1,7 +1,7 @@
 import { isBefore2PM, type WeatherData, formatPrecipitationType, getWindDescription } from "./weatherService";
 import TableDisplay, { type TableAttribute } from "./TableDisplay";
 
-export function WeatherDetailsSection({ currentWeather, forecast4pm, currentTime }: { currentWeather: WeatherData | null, forecast4pm: WeatherData | null, currentTime: Date }) {
+export function WeatherDetailsSection({ currentWeather, forecast4pm }: { currentWeather: WeatherData | null, forecast4pm: WeatherData | null }) {
     const weatherAttributes: TableAttribute<WeatherData>[] = [
         {
             label: 'Current temperature',
@@ -10,13 +10,6 @@ export function WeatherDetailsSection({ currentWeather, forecast4pm, currentTime
         {
             label: 'Forecast',
             render: (weather: WeatherData) => weather.shortForecast,
-        },
-        {
-            label: 'Temperature range',
-            render: (weather: WeatherData) =>
-                weather.minTemperature !== undefined && weather.maxTemperature !== undefined
-                    ? `${weather.minTemperature}°${weather.temperatureUnit} - ${weather.maxTemperature}°${weather.temperatureUnit}`
-                    : 'N/A',
         },
         {
             label: 'Wind',
@@ -36,6 +29,14 @@ export function WeatherDetailsSection({ currentWeather, forecast4pm, currentTime
                 return `${formatPrecipitationType(weather.precipitationType)}: ${weather.probabilityOfPrecipitation}%${startTimeString}`;
             },
         },
+        {
+            label: 'Temperature range',
+            render: (weather: WeatherData) =>
+                weather.minTemperature !== undefined && weather.maxTemperature !== undefined
+                    ? `${weather.minTemperature}°${weather.temperatureUnit} - ${weather.maxTemperature}°${weather.temperatureUnit}`
+                    : 'N/A',
+            firstColSpan: forecast4pm !== null ? 2 : 1,
+        },
     ];
 
     return (
@@ -43,7 +44,7 @@ export function WeatherDetailsSection({ currentWeather, forecast4pm, currentTime
             <h2>Seattle Weather Forecast</h2>
             <TableDisplay
                 dataNow={currentWeather}
-                dataLater={isBefore2PM(currentTime) ? forecast4pm : null}
+                dataLater={isBefore2PM() ? forecast4pm : null}
                 attributes={weatherAttributes}
                 laterColumnHeader="4 PM"
             />
