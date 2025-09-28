@@ -14,23 +14,26 @@ const getAqiCategory = (aqi: number): string => {
 };
 
 const AqiDisplay: React.FC = () => {
-    const [northKirklandAqi, setNorthKirklandAqi] = useState<AqiData | null>(null);
-    const [seattleDowntownAqi, setSeattleDowntownAqi] = useState<AqiData | null>(null);
-    const [mountlakeTerraceAqi, setMountlakeTerraceAqi] = useState<AqiData | null>(null);
+    const [nkAqi, setNkAqi] = useState<AqiData | null>(null);
+    const [sdAqi, setSdAqi] = useState<AqiData | null>(null);
+    const [mtAqi, setMtAqi] = useState<AqiData | null>(null);
+    const [isLoading, setIsLoading] = useState(true);
     const [isExpanded, setIsExpanded] = useState(false);
     const effectRan = useRef(false);
 
     useEffect(() => {
         if (effectRan.current) return;
         const fetchAqiData = async () => {
-            const [northKirklandAqiData, seattleDowntownAqiData, mountlakeTerraceAqiData] = await Promise.all([
+            setIsLoading(true);
+            const [nkData, sdData, mtData] = await Promise.all([
                 getAqiDataForLocation("north-kirkland"),
                 getAqiDataForLocation("seattle-downtown"),
                 getAqiDataForLocation("mountlake-terrace")
             ]);
-            setNorthKirklandAqi(northKirklandAqiData);
-            setSeattleDowntownAqi(seattleDowntownAqiData);
-            setMountlakeTerraceAqi(mountlakeTerraceAqiData);
+            setNkAqi(nkData);
+            setSdAqi(sdData);
+            setMtAqi(mtData);
+            setIsLoading(false);
         };
 
         fetchAqiData();
@@ -40,7 +43,7 @@ const AqiDisplay: React.FC = () => {
         return () => clearInterval(interval);
     }, []);
 
-    const allAqiValues = [northKirklandAqi?.aqi, seattleDowntownAqi?.aqi, mountlakeTerraceAqi?.aqi].filter(
+    const allAqiValues = [nkAqi?.aqi, sdAqi?.aqi, mtAqi?.aqi].filter(
         (aqi): aqi is number => aqi !== null && aqi !== undefined
     );
 
@@ -48,19 +51,26 @@ const AqiDisplay: React.FC = () => {
         ? allAqiValues.reduce((sum, aqi) => sum + aqi, 0) / allAqiValues.length
         : null;
 
-    const averageAqiCategory = averageAqi !== null ? getAqiCategory(averageAqi) : 'Loading';
+    const averageAqiCategory = averageAqi !== null ? getAqiCategory(averageAqi) : (isLoading ? 'Loading' : 'Not Available');
 
     const toggleExpanded = () => {
         setIsExpanded(!isExpanded);
     };
 
-    const combinedAqiContents = averageAqi !== null ? (
+    const combinedAqiContents = isLoading ? (
+        <p>Loading AQI data...</p>
+    ) : averageAqi !== null ? (
         <div className="aqi-details-container">
             <div className={`aqi-circle aqi-circle-${averageAqiCategory.toLowerCase().replace(/\s/g, '-')}`}></div>
             <p className="aqi-value">{averageAqi.toFixed(1)}</p>
             <p className="aqi-category">{averageAqiCategory}</p>
         </div>
-    ) : <p>Loading AQI data...</p>;
+    ) : (
+        <div className="aqi-details-container">
+            <p className="aqi-value">--</p>
+            <p className="aqi-category">Not Available</p>
+        </div>
+    );
 
     return (
         <div className="aqi-display-container">
@@ -85,9 +95,9 @@ const AqiDisplay: React.FC = () => {
             </button>
             {isExpanded && (
                 <div className="aqi-expanded-details">
-                    <AqiCard locationName="North Kirkland" aqiData={northKirklandAqi} />
-                    <AqiCard locationName="Seattle Downtown" aqiData={seattleDowntownAqi} />
-                    <AqiCard locationName="Mountlake Terrace" aqiData={mountlakeTerraceAqi} />
+                    <AqiCard locationName="North Kirkland" aqiData={nkAqi} />
+                    <AqiCard locationName="Seattle Downtown" aqiData={sdAqi} />
+                    <AqiCard locationName="Mountlake Terrace" aqiData={mtAqi} />
                 </div>
             )}
         </div>
