@@ -125,6 +125,8 @@ const getWeatherDetailsAtTime = (
     let shortForecast = 'N/A';
     let icon = '';
 
+    const isDay = targetTime.getHours() >= 6 && targetTime.getHours() < 18;
+
     const weatherAtTime = properties.weather.values.find(item => {
         const validTimeStart = new Date(item.validTime.split('/')[0]);
         const validTimeEnd = new Date(validTimeStart.getTime() + parseDuration(item.validTime.split('/')[1]));
@@ -133,33 +135,43 @@ const getWeatherDetailsAtTime = (
 
     if (weatherAtTime && weatherAtTime.value.length > 0 && weatherAtTime.value[0].weather) {
         shortForecast = weatherAtTime.value[0].weather;
-        if (shortForecast.toLowerCase().includes('sunny') || shortForecast.toLowerCase().includes('clear')) {
-            icon = 'https://api.weather.gov/icons/land/day/skc?size=medium';
-        } else if (shortForecast.toLowerCase().includes('cloud')) {
-            icon = 'https://api.weather.gov/icons/land/day/few?size=medium';
-        } else if (shortForecast.toLowerCase().includes('rain')) {
-            icon = 'https://api.weather.gov/icons/land/day/ra?size=medium';
-        } else if (shortForecast.toLowerCase().includes('showers')) {
-            icon = 'https://api.weather.gov/icons/land/day/shra?size=medium';
-        } else if (shortForecast.toLowerCase().includes('thunder')) {
-            icon = 'https://api.weather.gov/icons/land/day/tsra?size=medium';
+        const forecastLower = shortForecast.toLowerCase();
+
+        if (forecastLower.includes('thunder')) {
+            icon = isDay ? 'wi-day-thunderstorm' : 'wi-night-alt-thunderstorm';
+        } else if (forecastLower.includes('sleet')) {
+            icon = 'wi-sleet';
+        } else if (forecastLower.includes('snow')) {
+            icon = 'wi-snow';
+        } else if (forecastLower.includes('rain')) {
+            icon = isDay ? 'wi-day-rain' : 'wi-night-alt-rain';
+        } else if (forecastLower.includes('showers')) {
+            icon = isDay ? 'wi-day-showers' : 'wi-night-alt-showers';
+        } else if (forecastLower.includes('fog') || forecastLower.includes('haze')) {
+            icon = isDay ? 'wi-day-haze' : 'wi-fog';
+        } else if (forecastLower.includes('cloud')) {
+            icon = isDay ? 'wi-day-cloudy' : 'wi-night-alt-cloudy';
+        } else if (forecastLower.includes('sunny') || forecastLower.includes('clear')) {
+            icon = isDay ? 'wi-day-sunny' : 'wi-night-clear';
         } else {
-            icon = 'https://api.weather.gov/icons/land/day/ovc?size=medium';
+            icon = 'wi-cloudy';
         }
     } else {
         const skyCoverAtTime = getSpecificValue(properties.skyCover.values);
         if (skyCoverAtTime !== undefined) {
+            // Sky cover is a percentage, so we can map it to icons.
+            // NWS API sometimes lacks a shortForecast string, so this is a good fallback.
             if (skyCoverAtTime < 25) {
-                icon = 'https://api.weather.gov/icons/land/day/skc?size=medium';
+                icon = isDay ? 'wi-day-sunny' : 'wi-night-clear';
                 shortForecast = 'Clear';
             } else if (skyCoverAtTime < 50) {
-                icon = 'https://api.weather.gov/icons/land/day/few?size=medium';
+                icon = isDay ? 'wi-day-cloudy' : 'wi-night-alt-cloudy';
                 shortForecast = 'Partly Cloudy';
             } else if (skyCoverAtTime < 75) {
-                icon = 'https://api.weather.gov/icons/land/day/bkn?size=medium';
+                icon = 'wi-cloud';
                 shortForecast = 'Mostly Cloudy';
             } else {
-                icon = 'https://api.weather.gov/icons/land/day/ovc?size=medium';
+                icon = 'wi-cloudy';
                 shortForecast = 'Overcast';
             }
         }

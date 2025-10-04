@@ -1,6 +1,7 @@
 import React from 'react';
 import { formatPrecipitationType, getWindDescription, type WeatherData } from './weatherService';
 import './WeatherCardDisplay.css';
+import { WeatherIcon } from './WeatherIcon';
 
 interface WeatherDetailsProps {
     icon: string;
@@ -11,7 +12,7 @@ interface WeatherDetailsProps {
 
 const WeatherDetails: React.FC<WeatherDetailsProps> = ({ icon, temperature, temperatureUnit, shortForecast }) => (
     <div className="weather-details">
-        <img src={icon} alt={shortForecast} className="weather-icon" />
+        <WeatherIcon iconName={icon} className="weather-icon" />
         <p>{temperature}°{temperatureUnit}</p>
         <p>{shortForecast}</p>
     </div>
