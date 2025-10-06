@@ -44,7 +44,30 @@ const iconMap: { [key: string]: React.ElementType } = {
     'wi-sleet': WiSleet,
 };
 
+const colorMap: { [key: string]: string } = {
+    'sunny': '#FFD700', // Gold
+    'clear': '#E0E0E0', // Light Gray for night
+    'rain': '#5CACEE',  // SteelBlue2
+    'showers': '#5CACEE',// SteelBlue2
+    'thunder': '#972EFF',// Bright Purple
+    'snow': '#B0E2FF',  // LightSkyBlue1
+    'sleet': '#B0E2FF', // LightSkyBlue1
+    'cloud': '#B0C4DE', // LightSteelBlue
+    'haze': '#F0E68C',  // Khaki
+    'fog': '#B0C4DE',   // LightSteelBlue
+};
+
+const getColorForIcon = (iconName: string): string | undefined => {
+    if (iconName.includes('day') && (iconName.includes('sunny') || iconName.includes('clear'))) {
+        return colorMap['sunny'];
+    }
+    for (const key in colorMap) {
+        if (iconName.includes(key)) return colorMap[key];
+    }
+};
+
 export const WeatherIcon: React.FC<{ iconName: string; className?: string }> = ({ iconName, className }) => {
     const IconComponent = iconMap[iconName] || WiNa;
-    return <IconComponent className={className} />;
+    const color = getColorForIcon(iconName);
+    return <IconComponent className={className} style={{ color }} />;
 };
