@@ -9,12 +9,15 @@ import { usePolling } from './hooks/usePolling';
 import { TransitAlertsSection } from './TransitAlertsSection';
 import { getSeattleWeather, isBefore2PM, type WeatherData } from './weatherService';
 import { WeatherDetailsSection } from './WeatherDetailsSection';
+import { useShouldUseMockData } from './mockData';
+import { MockDataToggle } from './MockDataToggle';
 
 function App() {
   const [alerts, setAlerts] = useState<AlertModel[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [lastFetched, setLastFetched] = useState<string | null>(null);
+  const [shouldUseMockData] = useShouldUseMockData();
 
   const [seattleWeather, setSeattleWeather] = useState<WeatherData | null>(null);
   const [seattleWeather4pm, setSeattleWeather4pm] = useState<WeatherData | null>(null);
@@ -34,7 +37,7 @@ function App() {
     setLoading(true);
     setError(null);
     try {
-      const alerts: AlertModel[] = await fetchAndProcessAlerts();
+      const alerts: AlertModel[] = await fetchAndProcessAlerts(shouldUseMockData);
       setAlerts(alerts);
       setLastFetched(new Date().toLocaleTimeString());
     } catch (err) {
@@ -66,6 +69,7 @@ function App() {
         <WeatherDetailsSection currentWeather={seattleWeather} forecast4pm={seattleWeather4pm} />
         <TransitAlertsSection loading={loading} alerts={alerts} />
       </main>
+      <MockDataToggle />
     </div>
   );
 }

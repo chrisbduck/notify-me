@@ -1,5 +1,6 @@
 import type { AlertModel, FeedMessage } from './model';
 import { Severity, sortBySeverity } from './model';
+import mockAlertsData from './test/mockAlerts.json';
 
 const ROUTE_ID = "100479"; // the 1 Line
 
@@ -21,7 +22,14 @@ function processAlerts(alerts: AlertModel[]): AlertModel[] {
     return sortBySeverity(processedAlerts);
 }
 
-export async function fetchAndProcessAlerts(): Promise<AlertModel[]> {
+export async function fetchAndProcessAlerts(useMockData: boolean): Promise<AlertModel[]> {
+    if (useMockData) {
+        console.log("Using mock alert data");
+        const feedMessage = mockAlertsData as unknown as FeedMessage;
+        const filteredAlerts = _getFilteredAlerts(feedMessage, ROUTE_ID);
+        return processAlerts(filteredAlerts);
+    }
+
     const alerts_url = "https://s3.amazonaws.com/st-service-alerts-prod/alerts_pb.json";
 
     try {

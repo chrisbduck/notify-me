@@ -179,8 +179,8 @@ const getWeatherDetailsAtTime = (
 
     return {
         temperature: getSpecificValue(properties.temperature.values),
-        shortForecast: shortForecast,
-        icon: icon,
+        shortForecast,
+        icon,
     };
 };
 
