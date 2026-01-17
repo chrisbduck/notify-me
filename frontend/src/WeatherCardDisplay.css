@@ -91,6 +91,10 @@
   color: #ff4d4d; /* Red for severe alerts */
 }
 
+.alert-summary-icon.warning-icon {
+  color: #ffcc00; /* Yellow for warning alerts */
+}
+
 .alert-summary-icon.success-icon {
   color: #5cb85c; /* Green for no major problems */
 }

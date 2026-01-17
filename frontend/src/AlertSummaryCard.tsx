@@ -1,4 +1,5 @@
 import { FaCheckCircle, FaExclamationTriangle } from 'react-icons/fa';
+import { TbAlertOctagonFilled } from "react-icons/tb";
 import { Severity, type AlertModel } from './model';
 import './WeatherCardDisplay.css'; // Reusing the card styling
 
@@ -13,6 +14,7 @@ function AlertSummaryCard({ loading, alerts }: { loading: boolean, alerts: Alert
     }
 
     const severeAlert = alerts.find(alert => alert.severity_level === Severity.SEVERE);
+    const warningAlert = alerts.find(alert => alert.severity_level === Severity.WARNING);
 
     return (
         <div className="weather-card"> {/* Reusing weather-card styling */}
@@ -20,8 +22,13 @@ function AlertSummaryCard({ loading, alerts }: { loading: boolean, alerts: Alert
             <div className="alert-summary-content">
                 {severeAlert ? (
                     <>
-                        <FaExclamationTriangle className="alert-summary-icon severe-icon" />
+                        <TbAlertOctagonFilled className="alert-summary-icon severe-icon" />
                         <p>{severeAlert.effect_detail?.translation[0]?.text || severeAlert.effect}</p>
+                    </>
+                ) : warningAlert ? (
+                    <>
+                        <FaExclamationTriangle className="alert-summary-icon warning-icon" />
+                        <p>{warningAlert.effect_detail?.translation[0]?.text || warningAlert.effect}</p>
                     </>
                 ) : (
                     <>
