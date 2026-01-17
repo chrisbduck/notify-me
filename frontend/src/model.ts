@@ -175,3 +175,16 @@ export function lessThan(a?: Severity, b?: Severity): number {
 export function sortBySeverity(alerts: AlertModel[]): AlertModel[] {
     return alerts.slice().sort((a: AlertModel, b: AlertModel) => lessThan(a.severity_level, b.severity_level));
 }
+
+export function downgradeSeverity(severity: Severity | undefined): Severity {
+    switch (severity) {
+        case Severity.SEVERE:
+            return Severity.WARNING;
+        case Severity.WARNING:
+        case Severity.INFO:
+            return Severity.INFO;
+        case Severity.UNKNOWN_SEVERITY:
+        default:
+            return Severity.UNKNOWN_SEVERITY;
+    }
+}

@@ -1,5 +1,5 @@
-import type { AlertModel, FeedMessage } from './model';
-import { Severity, sortBySeverity } from './model';
+import type { AlertModel, FeedMessage, InformedEntity } from './model';
+import { downgradeSeverity, Severity, sortBySeverity } from './model';
 import mockAlertsData from './test/mockAlerts.json';
 
 const ROUTE_ID = "100479"; // the 1 Line
@@ -9,7 +9,7 @@ const isLocalHost: boolean = window.location.href.includes('localhost');
 // Control constant for enabling severity override for testing
 const ENABLE_SEVERITY_OVERRIDE_FOR_TESTING = isLocalHost && false;
 
-const overrideAlertSeveritiesForTesting = (alertsToModify: AlertModel[]): AlertModel[] => {
+const _overrideAlertSeveritiesForTesting = (alertsToModify: AlertModel[]): AlertModel[] => {
     const severityLevels = [Severity.INFO, Severity.WARNING, Severity.SEVERE, Severity.UNKNOWN_SEVERITY];
     return alertsToModify.map((alert, index) => ({
         ...alert,
@@ -17,8 +17,26 @@ const overrideAlertSeveritiesForTesting = (alertsToModify: AlertModel[]): AlertM
     }));
 };
 
+function _hasEffectDetail(alert: AlertModel, detailText: string): boolean {
+    return alert.effect_detail?.translation.some((translation) => translation.text === detailText) || false;
+}
+
+function _adjustAlertSeverities(alerts: AlertModel[]): AlertModel[] {
+    return alerts.map((alert) => {
+        // Most severities are too high, so we generally want to downgrade
+        let downgrade = true;
+
+        // If there is an "OTHER_EFFECT" with detail "DELAY", leave the severity as is
+        if (alert.effect === "OTHER_EFFECT" && _hasEffectDetail(alert, "DELAY")) downgrade = false;
+
+        const adjustedSeverity = downgrade ? downgradeSeverity(alert.severity_level) : alert.severity_level;
+        return { ...alert, severity_level: adjustedSeverity };
+    });
+}
+
 function processAlerts(alerts: AlertModel[]): AlertModel[] {
-    const processedAlerts = ENABLE_SEVERITY_OVERRIDE_FOR_TESTING ? overrideAlertSeveritiesForTesting(alerts) : alerts;
+    const processedAlerts = ENABLE_SEVERITY_OVERRIDE_FOR_TESTING ? _overrideAlertSeveritiesForTesting(alerts)
+        : _adjustAlertSeverities(alerts);
     return sortBySeverity(processedAlerts);
 }
 
@@ -46,6 +64,10 @@ export async function fetchAndProcessAlerts(useMockData: boolean): Promise<Alert
     }
 }
 
+function _includesImportantRoute(entities: InformedEntity[], route_id: string): boolean {
+    return entities.some((entity: { route_id?: string }) => entity.route_id === route_id);
+}
+
 function _getFilteredAlerts(feedMessage: FeedMessage, route_id: string): AlertModel[] {
     const entities = feedMessage.entity || [];
     const filtered_results: AlertModel[] = [];
@@ -61,10 +83,12 @@ function _getFilteredAlerts(feedMessage: FeedMessage, route_id: string): AlertMo
         const causeDetailText = alert.cause_detail?.translation?.[0]?.text;
         if (causeDetailText === "SPECIAL_EVENT" || causeDetailText === "SCHEDULED_MAINTENANCE") continue;
 
+        // Ignore unimportant routes
         const informedEntities = alert.informed_entity || [];
-        if (informedEntities.some((entity: { route_id?: string }) => entity.route_id === route_id)) {
-            filtered_results.push(alert);
-        }
+        if (!_includesImportantRoute(informedEntities, route_id)) continue;
+
+        // Include it
+        filtered_results.push(alert);
     }
     return filtered_results;
 }
