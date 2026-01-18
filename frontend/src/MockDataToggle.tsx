@@ -1,8 +1,8 @@
-import { useShouldUseMockData } from './mockData';
+import { useShouldUseMockTransitData } from './mockData';
 
 
 export const MockDataToggle = () => {
-    const [useMockData, setUseMockData] = useShouldUseMockData();
+    const [useMockData, setUseMockData] = useShouldUseMockTransitData();
     const isLocalHost = window.location.href.includes('localhost');
 
     if (!isLocalHost) return null;

@@ -9,7 +9,7 @@ import { usePolling } from './hooks/usePolling';
 import { TransitAlertsSection } from './TransitAlertsSection';
 import { getSeattleWeather, isBefore2PM, type WeatherData } from './weatherService';
 import { WeatherDetailsSection } from './WeatherDetailsSection';
-import { useShouldUseMockData } from './mockData';
+import { useShouldUseMockTransitData } from './mockData';
 import { MockDataToggle } from './MockDataToggle';
 
 function App() {
@@ -17,7 +17,7 @@ function App() {
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [lastFetched, setLastFetched] = useState<string | null>(null);
-  const [shouldUseMockData] = useShouldUseMockData();
+  const [shouldUseMockData] = useShouldUseMockTransitData();
 
   const [seattleWeather, setSeattleWeather] = useState<WeatherData | null>(null);
   const [seattleWeather4pm, setSeattleWeather4pm] = useState<WeatherData | null>(null);

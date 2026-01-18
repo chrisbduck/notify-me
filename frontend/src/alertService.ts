@@ -1,6 +1,6 @@
 import type { AlertModel, FeedMessage, InformedEntity } from './model';
 import { downgradeSeverity, Severity, sortBySeverity } from './model';
-import mockAlertsData from './test/mockAlerts.json';
+import mockAlertsData from './testdata/transit/mockAlerts.json';
 
 const ROUTE_ID = "100479"; // the 1 Line
 

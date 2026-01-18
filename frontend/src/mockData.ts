@@ -2,7 +2,7 @@ import { useState } from "react";
 
 const MOCK_DATA_KEY = 'useMockAlerts';
 
-export function useShouldUseMockData() {
+export function useShouldUseMockTransitData() {
     const [value, setValue] = useState<boolean>(() => {
         return localStorage.getItem(MOCK_DATA_KEY) === 'true';
     });
