@@ -20,10 +20,6 @@ export const MockDataToggle: React.FC<MockDataToggleProps> = ({ useHook, label }
         <button
             onClick={toggleMockData}
             style={{
-                position: 'fixed',
-                bottom: '10px',
-                right: '10px',
-                zIndex: 9999,
                 padding: '8px 12px',
                 backgroundColor: useMockData ? '#f8d7da' : '#d4edda',
                 color: useMockData ? '#721c24' : '#155724',

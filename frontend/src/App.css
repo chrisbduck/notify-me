@@ -60,6 +60,15 @@ body {
   flex-wrap: wrap; /* Allows cards to wrap on smaller screens */
 }
 
+.mock-data-toggles {
+  position: fixed;
+  bottom: 10px;
+  right: 10px;
+  z-index: 9999;
+  display: flex;
+  gap: 10px;
+}
+
 @media (max-width: 768px) {
   .main-content-cards {
     flex-direction: column;

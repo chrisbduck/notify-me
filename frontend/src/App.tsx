@@ -9,7 +9,7 @@ import { usePolling } from './hooks/usePolling';
 import { TransitAlertsSection } from './TransitAlertsSection';
 import { getSeattleWeather, isBefore2PM, type WeatherData } from './weatherService';
 import { WeatherDetailsSection } from './WeatherDetailsSection';
-import { useShouldUseMockTransitData } from './mockData';
+import { useShouldUseMockAQIData, useShouldUseMockTransitData, useShouldUseMockWeatherData } from './mockData';
 import { MockDataToggle } from './MockDataToggle';
 
 function App() {
@@ -17,19 +17,20 @@ function App() {
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [lastFetched, setLastFetched] = useState<string | null>(null);
-  const [shouldUseMockData] = useShouldUseMockTransitData();
+  const [shouldUseMockTransitData] = useShouldUseMockTransitData();
+  const [shouldUseMockWeatherData] = useShouldUseMockWeatherData();
 
   const [seattleWeather, setSeattleWeather] = useState<WeatherData | null>(null);
   const [seattleWeather4pm, setSeattleWeather4pm] = useState<WeatherData | null>(null);
 
   const fetchSeattleWeather = useCallback(async () => {
-    setSeattleWeather(await getSeattleWeather());
+    setSeattleWeather(await getSeattleWeather(shouldUseMockWeatherData));
     if (isBefore2PM()) {
       const fourPM = new Date();
       fourPM.setHours(16, 0, 0, 0); // 4 PM local time
-      setSeattleWeather4pm(await getSeattleWeather(fourPM));
+      setSeattleWeather4pm(await getSeattleWeather(shouldUseMockWeatherData, fourPM));
     }
-  }, []);
+  }, [shouldUseMockWeatherData]);
 
   usePolling(fetchSeattleWeather, 300000); // Refresh every 5 minutes
 
@@ -37,7 +38,7 @@ function App() {
     setLoading(true);
     setError(null);
     try {
-      const alerts: AlertModel[] = await fetchAndProcessAlerts(shouldUseMockData);
+      const alerts: AlertModel[] = await fetchAndProcessAlerts(shouldUseMockTransitData);
       setAlerts(alerts);
       setLastFetched(new Date().toLocaleTimeString());
     } catch (err) {
@@ -69,7 +70,11 @@ function App() {
         <WeatherDetailsSection currentWeather={seattleWeather} forecast4pm={seattleWeather4pm} />
         <TransitAlertsSection loading={loading} alerts={alerts} />
       </main>
-      <MockDataToggle useHook={useShouldUseMockTransitData} label="Mock Transit Alerts" />
+      <div className="mock-data-toggles">
+        <MockDataToggle useHook={useShouldUseMockTransitData} label="Mock Transit Data" />
+        <MockDataToggle useHook={useShouldUseMockWeatherData} label="Mock Weather Data" />
+        <MockDataToggle useHook={useShouldUseMockAQIData} label="Mock AQI Data" />
+      </div>
     </div>
   );
 }

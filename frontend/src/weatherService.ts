@@ -1,3 +1,6 @@
+import mockPointData from './testdata/weather/mockWeatherPointData.json';
+import mockGridpointData from './testdata/weather/mockWeatherGridpointData.json';
+
 const NWS_API_BASE_URL = 'https://api.weather.gov';
 
 interface PointResponse {
@@ -232,24 +235,33 @@ export const isBefore2PM = (date?: Date): boolean => {
     return date.getTime() < twoPM.getTime();
 };
 
-const fetchWeatherData = async (latitude: number, longitude: number, targetTime: Date = new Date()): Promise<WeatherData | null> => {
+async function _fetchData(latitude: number, longitude: number, useMockData: boolean): Promise<{ pointData: PointResponse, gridpointData: GridpointResponse }> {
+    if (useMockData) {
+        return { pointData: mockPointData as PointResponse, gridpointData: mockGridpointData as GridpointResponse };
+    }
+
+    const pointResponse = await fetch(`${NWS_API_BASE_URL}/points/${latitude},${longitude}`,
+        { headers: { 'Accept': 'application/json', 'User-Agent': 'notify-me (chrisbduck@github.com)' } });
+    if (!pointResponse.ok) {
+        throw new Error(`HTTP error! status: ${pointResponse.status}`);
+    }
+    const pointData: PointResponse = await pointResponse.json();
+    const forecastGridUrl = pointData.properties.forecastGridData;
+
+    const gridpointResponse = await fetch(forecastGridUrl,
+        { headers: { 'Accept': 'application/json', 'User-Agent': 'notify-me (chrisbduck@github.com)' } });
+    if (!gridpointResponse.ok) {
+        throw new Error(`HTTP error! status: ${gridpointResponse.status}`);
+    }
+    const gridpointData: GridpointResponse = await gridpointResponse.json();
+    return { pointData, gridpointData };
+}
+
+const fetchWeatherData = async (latitude: number, longitude: number, useMockData: boolean, targetTime: Date = new Date()): Promise<WeatherData | null> => {
     try {
-        const pointResponse = await fetch(`${NWS_API_BASE_URL}/points/${latitude},${longitude}`,
-            { headers: { 'Accept': 'application/json', 'User-Agent': 'notify-me (chrisbduck@github.com)' } });
-        if (!pointResponse.ok) {
-            throw new Error(`HTTP error! status: ${pointResponse.status}`);
-        }
-        const pointData: PointResponse = await pointResponse.json();
-        const forecastGridUrl = pointData.properties.forecastGridData;
+        const { pointData, gridpointData } = await _fetchData(latitude, longitude, useMockData);
+
         const city = pointData.properties.relativeLocation.properties.city;
-
-        const gridpointResponse = await fetch(forecastGridUrl,
-            { headers: { 'Accept': 'application/json', 'User-Agent': 'notify-me (chrisbduck@github.com)' } });
-        if (!gridpointResponse.ok) {
-            throw new Error(`HTTP error! status: ${gridpointResponse.status}`);
-        }
-        const gridpointData: GridpointResponse = await gridpointResponse.json();
-
         const properties = gridpointData.properties;
         const today = targetTime.toISOString().split('T')[0];
 
@@ -359,5 +371,5 @@ const fetchWeatherData = async (latitude: number, longitude: number, targetTime:
         return null;
     }
 };
-export const getKirklandWeather = (targetTime?: Date) => fetchWeatherData(47.6763, -122.2063, targetTime);
-export const getSeattleWeather = (targetTime?: Date) => fetchWeatherData(47.6062, -122.3321, targetTime);
+export const getKirklandWeather = (useMockData: boolean, targetTime?: Date) => fetchWeatherData(47.6763, -122.2063, useMockData, targetTime);
+export const getSeattleWeather = (useMockData: boolean, targetTime?: Date) => fetchWeatherData(47.6062, -122.3321, useMockData, targetTime);
