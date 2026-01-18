@@ -13,7 +13,11 @@ const getAqiCategory = (aqi: number): string => {
     return 'Hazardous';
 };
 
-const AqiDisplay: React.FC = () => {
+interface AqiDisplayProps {
+    mockData: boolean;
+}
+
+const AqiDisplay: React.FC<AqiDisplayProps> = ({ mockData }: AqiDisplayProps) => {
     const [nkAqi, setNkAqi] = useState<AqiData | null>(null);
     const [sdAqi, setSdAqi] = useState<AqiData | null>(null);
     const [mtAqi, setMtAqi] = useState<AqiData | null>(null);
@@ -26,9 +30,9 @@ const AqiDisplay: React.FC = () => {
         const fetchAqiData = async () => {
             setIsLoading(true);
             const [nkData, sdData, mtData] = await Promise.all([
-                getAqiDataForLocation("north-kirkland"),
-                getAqiDataForLocation("seattle-downtown"),
-                getAqiDataForLocation("mountlake-terrace")
+                getAqiDataForLocation("north-kirkland", mockData),
+                getAqiDataForLocation("seattle-downtown", mockData),
+                getAqiDataForLocation("mountlake-terrace", mockData)
             ]);
             setNkAqi(nkData);
             setSdAqi(sdData);
@@ -41,7 +45,7 @@ const AqiDisplay: React.FC = () => {
         effectRan.current = true;
 
         return () => clearInterval(interval);
-    }, []);
+    }, [mockData]);
 
     const allAqiValues = [nkAqi?.aqi, sdAqi?.aqi, mtAqi?.aqi].filter(
         (aqi): aqi is number => aqi !== null && aqi !== undefined

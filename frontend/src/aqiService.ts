@@ -1,4 +1,7 @@
 import { apiFetch } from './apiFetch';
+import mockNorthKirklandData from './testdata/aqi/mockNorthKirkland.json';
+import mockMountlakeTerraceData from './testdata/aqi/mockMountlakeTerrace.json';
+import mockSeattleData from './testdata/aqi/mockSeattleDowntown.json';
 
 interface AqiApiResponse {
     sensor: string;
@@ -16,13 +19,27 @@ export interface AqiData {
     category: string;
 }
 
-export const getAqiDataForLocation = async (locationKey: string): Promise<AqiData | null> => {
-    try {
-        const response = await apiFetch(`aqi?sensor=${locationKey}`);
-        if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
+async function _fetchData(locationKey: string, mockData: boolean): Promise<AqiApiResponse> {
+    if (mockData) {
+        if (locationKey === 'north-kirkland') {
+            return mockNorthKirklandData as AqiApiResponse;
+        } else if (locationKey === 'mountlake-terrace') {
+            return mockMountlakeTerraceData as AqiApiResponse;
+        } else {
+            return mockSeattleData as AqiApiResponse;
         }
-        const data: AqiApiResponse = await response.json();
+    }
+
+    const response = await apiFetch(`aqi?sensor=${locationKey}`);
+    if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+    }
+    return await response.json();
+}
+
+export const getAqiDataForLocation = async (locationKey: string, mockData: boolean): Promise<AqiData | null> => {
+    try {
+        const data: AqiApiResponse = await _fetchData(locationKey, mockData);
 
         return {
             aqi: data.aqi,

@@ -19,6 +19,7 @@ function App() {
   const [lastFetched, setLastFetched] = useState<string | null>(null);
   const [shouldUseMockTransitData] = useShouldUseMockTransitData();
   const [shouldUseMockWeatherData] = useShouldUseMockWeatherData();
+  const [shouldUseMockAQIData] = useShouldUseMockAQIData();
 
   const [seattleWeather, setSeattleWeather] = useState<WeatherData | null>(null);
   const [seattleWeather4pm, setSeattleWeather4pm] = useState<WeatherData | null>(null);
@@ -63,7 +64,7 @@ function App() {
           currentWeather={seattleWeather}
           forecast4pm={seattleWeather4pm}
         />
-        <AqiDisplay />
+        <AqiDisplay mockData={shouldUseMockAQIData} />
       </div>
       <main>
         {error && <p style={{ color: 'red' }}>{error}</p>}
