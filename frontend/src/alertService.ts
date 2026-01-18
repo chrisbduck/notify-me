@@ -17,6 +17,28 @@ const _overrideAlertSeveritiesForTesting = (alertsToModify: AlertModel[]): Alert
     }));
 };
 
+function _rangeOverlapsToday(startSeconds: number, endSeconds: number): boolean {
+    // Normalize inputs
+    const rangeStart = Math.min(startSeconds, endSeconds);
+    const rangeEnd = Math.max(startSeconds, endSeconds);
+
+    // Start of today (local time)
+    const now = new Date();
+    const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 0, 0, 0, 0);
+    const startOfTomorrow = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1, 0, 0, 0, 0);
+
+    const todayStartSeconds = Math.floor(startOfToday.getTime() / 1000);
+    const todayEndSeconds = Math.floor(startOfTomorrow.getTime() / 1000);
+
+    // Overlap check
+    return rangeEnd >= todayStartSeconds && rangeStart < todayEndSeconds;
+}
+
+function _hasRangeOverlappingToday(alert: AlertModel): boolean {
+    const activePeriods = alert.active_period || [];
+    return activePeriods.some((period) => _rangeOverlapsToday(period.start || 0, period.end || 0));
+}
+
 function _hasEffectDetail(alert: AlertModel, detailText: string): boolean {
     return alert.effect_detail?.translation.some((translation) => translation.text === detailText) || false;
 }
@@ -29,6 +51,9 @@ function _adjustAlertSeverities(alerts: AlertModel[]): AlertModel[] {
         // If there is an "OTHER_EFFECT" with detail "ANNOUNCEMENT", downgrade the severity - the warnings generally
         // aren't important
         if (alert.effect === "OTHER_EFFECT" && _hasEffectDetail(alert, "ANNOUNCEMENT")) downgrade = true;
+
+        // If the time range doesn't overlap today, downgrade the severity
+        if (!_hasRangeOverlappingToday(alert)) downgrade = true;
 
         const adjustedSeverity = downgrade ? downgradeSeverity(alert.severity_level) : alert.severity_level;
         return { ...alert, severity_level: adjustedSeverity };
