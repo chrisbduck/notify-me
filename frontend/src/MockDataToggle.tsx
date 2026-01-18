@@ -1,8 +1,12 @@
-import { useShouldUseMockTransitData } from './mockData';
+import React from 'react';
 
+interface MockDataToggleProps {
+    useHook: () => readonly [boolean, React.Dispatch<React.SetStateAction<boolean>>];
+    label: string;
+}
 
-export const MockDataToggle = () => {
-    const [useMockData, setUseMockData] = useShouldUseMockTransitData();
+export const MockDataToggle: React.FC<MockDataToggleProps> = ({ useHook, label }) => {
+    const [useMockData, setUseMockData] = useHook();
     const isLocalHost = window.location.href.includes('localhost');
 
     if (!isLocalHost) return null;
@@ -31,7 +35,7 @@ export const MockDataToggle = () => {
                 fontSize: '14px',
             }}
         >
-            {useMockData ? 'Disable Mock Alerts' : 'Enable Mock Alerts'}
+            {useMockData ? `Disable ${label}` : `Enable ${label}`}
         </button>
     );
 };

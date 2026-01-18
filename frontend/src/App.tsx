@@ -69,7 +69,7 @@ function App() {
         <WeatherDetailsSection currentWeather={seattleWeather} forecast4pm={seattleWeather4pm} />
         <TransitAlertsSection loading={loading} alerts={alerts} />
       </main>
-      <MockDataToggle />
+      <MockDataToggle useHook={useShouldUseMockTransitData} label="Mock Transit Alerts" />
     </div>
   );
 }
