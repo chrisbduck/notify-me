@@ -17,8 +17,10 @@ const _overrideAlertSeveritiesForTesting = (alertsToModify: AlertModel[]): Alert
     }));
 };
 
-function _rangeOverlapsToday(startSeconds: number, endSeconds: number): boolean {
+function _rangeOverlapsToday(startSeconds?: number, endSeconds?: number): boolean {
     // Normalize inputs
+    if (startSeconds === undefined) startSeconds = 0;
+    if (endSeconds === undefined) endSeconds = Number.MAX_SAFE_INTEGER;
     const rangeStart = Math.min(startSeconds, endSeconds);
     const rangeEnd = Math.max(startSeconds, endSeconds);
 
@@ -36,7 +38,7 @@ function _rangeOverlapsToday(startSeconds: number, endSeconds: number): boolean 
 
 function _hasRangeOverlappingToday(alert: AlertModel): boolean {
     const activePeriods = alert.active_period || [];
-    return activePeriods.some((period) => _rangeOverlapsToday(period.start || 0, period.end || 0));
+    return activePeriods.some((period) => _rangeOverlapsToday(period.start, period.end));
 }
 
 function _hasEffectDetail(alert: AlertModel, detailText: string): boolean {
