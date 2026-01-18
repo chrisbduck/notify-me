@@ -24,10 +24,11 @@ function _hasEffectDetail(alert: AlertModel, detailText: string): boolean {
 function _adjustAlertSeverities(alerts: AlertModel[]): AlertModel[] {
     return alerts.map((alert) => {
         // Most severities are too high, so we generally want to downgrade
-        let downgrade = true;
+        let downgrade = false;
 
-        // If there is an "OTHER_EFFECT" with detail "DELAY", leave the severity as is
-        if (alert.effect === "OTHER_EFFECT" && _hasEffectDetail(alert, "DELAY")) downgrade = false;
+        // If there is an "OTHER_EFFECT" with detail "ANNOUNCEMENT", downgrade the severity - the warnings generally
+        // aren't important
+        if (alert.effect === "OTHER_EFFECT" && _hasEffectDetail(alert, "ANNOUNCEMENT")) downgrade = true;
 
         const adjustedSeverity = downgrade ? downgradeSeverity(alert.severity_level) : alert.severity_level;
         return { ...alert, severity_level: adjustedSeverity };
