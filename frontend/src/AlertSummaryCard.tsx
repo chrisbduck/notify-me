@@ -2,6 +2,7 @@ import { FaCheckCircle, FaExclamationTriangle } from 'react-icons/fa';
 import { TbAlertOctagonFilled } from "react-icons/tb";
 import { Severity, type AlertModel } from './model';
 import './WeatherCardDisplay.css'; // Reusing the card styling
+import { getAlertSummaryText } from './alertService';
 
 function AlertSummaryCard({ loading, alerts }: { loading: boolean, alerts: AlertModel[] }) {
     if (loading) {
@@ -23,12 +24,12 @@ function AlertSummaryCard({ loading, alerts }: { loading: boolean, alerts: Alert
                 {severeAlert ? (
                     <>
                         <TbAlertOctagonFilled className="alert-summary-icon severe-icon" />
-                        <p>{severeAlert.effect_detail?.translation[0]?.text || severeAlert.effect}</p>
+                        <p>{getAlertSummaryText(severeAlert)}</p>
                     </>
                 ) : warningAlert ? (
                     <>
                         <FaExclamationTriangle className="alert-summary-icon warning-icon" />
-                        <p>{warningAlert.effect_detail?.translation[0]?.text || warningAlert.effect}</p>
+                        <p>{getAlertSummaryText(warningAlert)}</p>
                     </>
                 ) : (
                     <>

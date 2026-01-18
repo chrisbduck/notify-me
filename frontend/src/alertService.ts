@@ -118,3 +118,20 @@ function _getFilteredAlerts(feedMessage: FeedMessage, route_id: string): AlertMo
     }
     return filtered_results;
 }
+
+function _convertUpperCaseToTitleCase(text: string): string {
+    return text.split('_').map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()).join(' ');
+}
+
+export function getAlertSummaryText(alert: AlertModel): string {
+    // Get from translation text or effect (both are often not great descriptions)
+    let text = alert.effect_detail?.translation[0]?.text || alert.effect || "";
+
+    // If upper case, make it title case for better readability
+    if (text === text.toUpperCase()) text = _convertUpperCaseToTitleCase(text);
+
+    // Make it clear if the alert isn't for today
+    if (!_hasRangeOverlappingToday(alert)) text += " (future)";
+
+    return text || "(no details available)";
+}
