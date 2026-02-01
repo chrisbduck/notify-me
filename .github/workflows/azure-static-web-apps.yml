@@ -3,10 +3,7 @@ name: Deploy to Azure Static Web Apps
 env:
   APP_LOCATION: "frontend" # location of your client code
   OUTPUT_LOCATION: "dist" # location of client code build output
-  # temporarily disabling api build
-  #API_LOCATION: "api" # location of your api source code - optional
-  API_LOCATION: ""
-  skip_api_build: true
+  API_LOCATION: "api" # location of your api source code - optional
 
 on:
   push:
