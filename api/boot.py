@@ -13,7 +13,7 @@ def _get_script_path() -> pathlib.Path:
 
 # Return the path of the package directory
 def _get_package_path() -> pathlib.Path:
-    return _get_script_path() / '.python_packages' / 'lib' / 'python3.10' / 'site-packages'
+    return _get_script_path() / '.python_packages' / 'lib' / 'python3.11' / 'site-packages'
 
 def init_paths():
     # Add the package path to the system path
