@@ -43,10 +43,18 @@
 			"detail": "tsc -b && vite build"
 		},
 		{
-			"label": "deploy",
+			"label": "deploy (preview)",
 			"type": "shell",
 			"command": "swa",
 			"args": [ "deploy" ],
+			"problemMatcher": [ ],
+			"dependsOn": [ "npm: build - frontend" ],
+		},
+		{
+			"label": "deploy (production)",
+			"type": "shell",
+			"command": "swa",
+			"args": [ "deploy", "--env", "production" ],
 			"problemMatcher": [ ],
 			"dependsOn": [ "npm: build - frontend" ],
 		}
