@@ -1,5 +1,5 @@
-from boot import init_paths
-init_paths()
+#from boot import init_paths
+#init_paths()
 
 import azure.functions as func
 import logging
