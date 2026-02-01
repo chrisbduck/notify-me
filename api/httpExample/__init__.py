@@ -1,9 +1,5 @@
-#from boot import init_paths
-#init_paths()
-
 import azure.functions as func
 import logging
-import json # Added for potential future use, though not directly used in HttpExample's current logic
 
 def main(req: func.HttpRequest) -> func.HttpResponse:
     logging.info('Python HTTP trigger function processed a request.')
