@@ -17,3 +17,4 @@
    * Instead, go to Settings > Environments in the left panel, and you should be able to see it there.
 1. "Waiting for deployment" on the main page of the Static Web App resource is probably actually telling the truth.
    * Odds are that `swa` didn't deploy correctly but didn't tell you.
+
